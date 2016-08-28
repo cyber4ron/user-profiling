@@ -1,0 +1,39 @@
+<coordinator-app name="profiling_touring_house" frequency="${coord:days(1)}" start="${start}" end="${end}" timezone="GMT+0800"
+xmlns="uri:oozie:coordinator:0.2">
+    <controls>
+        <concurrency>1</concurrency>
+    </controls>
+    <datasets>
+        <dataset name="dim_merge_showing_house_day" frequency="${coord:days(1)}" initial-instance="2015-11-01T00:00+0800" timezone="GMT+0800">
+            <uri-template>${hcatNode}/data_center/dim_merge_showing_house_day/pt=${YEAR}${MONTH}${DAY}000000</uri-template>
+        </dataset>
+    </datasets>
+    <input-events>
+        <data-in name="merge_showing_house_day" dataset="dim_merge_showing_house_day">
+            <instance>${coord:current(-1)}</instance>
+        </data-in>
+    </input-events>
+    <action>
+        <workflow>
+            <app-path>${nameNode}/user/bigdata/oozie/profiling/touring_house</app-path>
+            <configuration>
+                <property>
+                    <name>jobTracker</name>
+                    <value>${jobTracker}</value>
+                </property>
+                <property>
+                    <name>nameNode</name>
+                    <value>${nameNode}</value>
+                </property>
+                <property>
+                    <name>queueName</name>
+                    <value>${queueName}</value>
+                </property>
+                <property>
+                    <name>partition</name>
+                    <value>${coord:formatTime(coord:dateOffset(coord:nominalTime(),-1,'DAY'),'yyyyMMdd000000')}</value>
+                </property>
+            </configuration>
+        </workflow>
+    </action>
+</coordinator-app>
