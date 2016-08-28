@@ -16,3 +16,11 @@
 *.log*
 
 phone
+
+user-profiling-tagging/src/main/resources/bizcircles
+user-profiling-tagging/src/test/resources/neg_with
+user-profiling-config/src/main/resources/*.xml
+user-profiling-tagging/src/test/resources/train.txt
+user-profiling-tagging/src/test/resources/neg_with_phone
+user-profiling-tagging/src/test/resources/sample_libsvm_data.txt
+

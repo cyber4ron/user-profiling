@@ -1,0 +1,88 @@
+{
+  "filter_items": {
+    "districtId": ["330105"],
+    "priceTotalMin": {
+      "\u0000*\u0000_min": "*",
+      "\u0000*\u0000_max": 300
+    },
+    "priceTotalMax": {
+      "\u0000*\u0000_min": 250,
+      "\u0000*\u0000_max": "*"
+    },
+    "feature": ["decoration"],
+    "buildType": [107500000004],
+    "0": {
+      "\u0000*\u0000_arr": {
+        "cityId": 330100
+      },
+      "\u0000*\u0000_logicOperator": " OR "
+    }
+  },
+  "filter_items": {
+    "districtId": ["23008677"],
+    "0": {
+      "\u0000*\u0000_arr": {
+        "cityId": 440300
+      },
+      "\u0000*\u0000_logicOperator": " OR "
+    }
+  },
+  "filter_items": {
+    "districtId": ["120112"],
+    "subwayLineId": ["110458004"],
+    "bedroomNum": ["2"],
+    "priceTotalMin": {
+      "\u0000*\u0000_min": "*",
+      "\u0000*\u0000_max": 80
+    },
+    "priceTotalMax": {
+      "\u0000*\u0000_min": "*",
+      "\u0000*\u0000_max": "*"
+    },
+    "buildType": [107500000010],
+    "sellStatus": ["1"],
+    "0": {
+      "\u0000*\u0000_arr": {
+        "cityId": 120000
+      },
+      "\u0000*\u0000_logicOperator": " OR "
+    }
+  },
+  "filter_items": {
+    "isValid": [1],
+    "isCmsValid": [1],
+    "0": {
+      "logicOperator": " AND ",
+      "arr": {
+        "cityId": 510100,
+        "appid": {}
+      }
+    },
+    "houseType": {
+      "arr": [107500000001, 107500000002, 107500000003, 107500000004, 107500000005, 107500000009, 107500000010, 107500000012, 107500000013, 107500000014, 107500000015]
+    },
+    "subwayLineId": ["110460717"],
+    "1": {
+      "arr": {
+        "tags": {},
+        "registerTime": {}
+      },
+      "logicOperator": " OR "
+    }
+  },
+  "filter_items": {
+    "isValid": [1],
+    "isCmsValid": [1],
+    "0": {
+      "logicOperator": " AND ",
+      "arr": {
+        "cityId": 320100,
+        "appid": {}
+      }
+    },
+    "houseType": {
+      "arr": [107500000001, 107500000002, 107500000003, 107500000004, 107500000005, 107500000009, 107500000010, 107500000012, 107500000013, 107500000014, 107500000015]
+    },
+    "bizcircleId": ["61140013"]
+  }
+}

@@ -1,0 +1,64 @@
+
+# example在work@jx-bd-off-hadoop00:~/fl下
+
+# 一些类型带bigdata标签
+
+# page visit, 主要是url? 没什么用? 有时有keywords
+INFO:	2016-05-09 20:08:04	ip[123.125.71.83]	token[1235780803]	[bigdata.pagevisit]	_	{"uuid":"794eab1f-a650-4312-83f0-b2054c863071","session_id":"3a1a52c17a3b48a36da91a667eef5b47","user_id":null,"city_id":320100,"out_source_website":"","referer_url":null,"current_url":"http:\/\/nj.lianjia.com\/ditiefang\/li110460689s100021149\/houzaimen\/cdo41lc2lc3a2a5\/","referer_page":0,"current_page":3,"channel_id":11,"is_search":0,"keywords":null,"out_source_type":4,"out_keywords":""}
+INFO:	2016-05-09 20:08:04	ip[157.55.39.176]	token[435693617]	[bigdata.pagevisit]	_	{"uuid":"b9900868-7acc-4839-88ad-b56fdb5f1cb7","session_id":"d01e0955c81f36332eb40fceea6f9d8a","user_id":null,"city_id":110000,"out_source_website":"","referer_url":null,"current_url":"http:\/\/bj.lianjia.com\/ershoufang\/f1c1111027375352\/","referer_page":0,"current_page":2,"channel_id":2,"is_search":0,"keywords":null,"out_source_type":4,"out_keywords":""}
+
+# follow, attention_id
+INFO:	2016-05-09 20:44:32	ip[114.253.23.114]	token[1364365892]	[bigdata.follow]	_	{"uuid":"aef9a3e6-9358-408e-9ad5-85602b96f494","session_id":"df79459710d094b8edd458af1e264ffb","user_id":1000000020083719,"attention_id":"BJCY92140782","attention_type":"2"}
+
+# search, 有用的是filter items90
+INFO:	2016-05-09 20:01:06	ip[157.55.39.184]	token[986991188]	[bigdata.search]	_	{"uuid":"1284ec8c-708c-45f4-9c9a-750440534ccd","session_id":"478f6e38a38c83300a68c6b529458fb9","user_id":null,"city_id":110000,"out_source_website":"","referer_url":null,"current_url":"http:\/\/bj.lianjia.com\/xiaoqu\/1111027376278\/esf\/l5a3\/","referer_page":0,"current_page":0,"channel_id":6,"is_search":0,"keywords":null,"out_source_type":4,"out_keywords":"","search_source":"1","filter_items":{"isValid":[1],"isCmsValid":[1],"0":{"arr":[{},{}],"logicOperator":" OR "},"houseType":{"arr":[107500000001,107500000002,107500000003,107500000004,107500000005,107500000009,107500000010,107500000012,107500000013,107500000014,107500000015]},"communityId":["1111027376278"],"houseArea":{"min":70,"max":90},"bedroomNum":["5"]},"result_number":0,"page_index":1}
+
+# click, 格式不明, 像是点击url
+223.104.3.224	-	app.api.lianjia.com	[09/May/2016:20:00:04 +0800]	"POST /newhouse/apisearch HTTP/1.1"	739	200	19467	0.191	"-"	"HomeLink6.12.4;Xiaomi MI+4LTE; Android 6.0.1"	"10.23.245.227"	"0.191"
+223.146.120.36	-	bj.lianjia.com	[09/May/2016:20:59:55 +0800]	"GET /ershoufang/BJCY92149601.html HTTP/1.1"	1454	200	30501	0.727	"http://bj.lianjia.com/ershoufang/xibahe/co32/"	"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36"	"10.23.246.232"	"0.727"
+223.104.227.191	-	app.api.lianjia.com	[09/May/2016:20:59:55 +0800]	"POST /house/ershoufang/mapSearch HTTP/1.1"	825	200	754	0.074	"-"	"HomeLink6.12.4;lge LG-D858; Android 5.0.1"	"10.23.246.232"	"0.074"
+223.72.103.25	-	app.api.lianjia.com	[09/May/2016:20:59:55 +0800]	"POST /channel/zhinan/getRecommendArticle HTTP/1.1"	711	200	613	0.011	"-"	"HomeLink 6.12.4;iPhone6,2;iOS 8.1.3;"	"10.23.245.227"	"0.011"
+171.214.239.30	-	ajax.lianjia.com	[09/May/2016:20:59:55 +0800]	"GET /ajax/housesell/area/community?ids=1611059620209%2C3011053925975%2C3011053926402%2C3011053533332%2C3011055567680%2C3011053536959%2C3011055563859%2C1611059505929%2C167602269074399%2C3011053928756%2C3011055571102%2C1611059021962%2C3011055574613%2C1611099906246%2C1611060385338%2C3011055572733%2C3011055571798%2C3011053397212%2C3011053539359%2C3011054691222%2C3011055563006%2C1611061295780%2C1611100840932%2C1611061620663&limit_offset=0&limit_count=10&sort=&&city_id=510100&callback=jQuery111105293470782091405_1462798482047&_=1462798482232 HTTP/1.1"	1373	200	13988	0.447	"http://cd.lianjia.com/ditu/"	"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0; BOIE9;ZHCN)"	"10.23.245.227"	"0.447"
+
+# open, 格式不明
+2016-05-09 20:11:31	172.16.5.249	18612781131	2000000003108501	4677A55D-2743-4641-8BC0-7847A2F6FFA8	20160106_ios	5090503205257	/house/suggestion/index?channel_id=ershoufang&city_id=510100&query=%E5%8F%8C%E6%A5%A0%E5%90%89ji&request_ts=1462795891		HomeLink 6.12.4	iPhone7,2	iOS 9.3.1
+2016-05-09 20:11:31	117.136.8.224		0	868568021877169	20160106_android	5090186199318	/user/setting/setAttributes	Android_Xiaomi	HomeLink6.12.4	Xiaomi MI+4LTE	Android 4.4.4
+2016-05-09 20:11:31	211.100.57.45	13161180700	2000000002041831	9DD2FDB1-7875-4CDF-BEE8-99D0B6017432	20160106_ios	5091398278801	/user/profile/getRecordCount?request_ts=1462795891		HomeLink 6.12.2	iPhone7,1	iOS 9.2.1
+
+# m_site_log, 不太可用..
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application.OmniBoxNewHouses]	subway_house [house_code:BJFT90756189] get	{"buildingId":1112027392908,"distanceText":"","distanceValue":623,"durationText":"","durationValue":0,"houseId":1115029434280,"houseIds":[],"id":955,"lines":[{"baiduCode":"277df81e6219d2b192114c6c","id":656,"name":"4号线","sorted":3}],"name":"C","pointLat":39.842077,"pointLng":116.37762,"resblockId":1111027380365,"station":{"id":43137677,"name":"公益西桥","pointLat":39.84306,"pointLng":116.377322},"straightLine":623}
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application]	OmniBoxNewHouses::hdicHouseRelatedSubwayStation data arrived!
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application]	OmniBoxNewHouses::schools4houseinfo ids (cache miss)	["BJFT90756189"]
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application.OmniBoxNew_degrade]	set degraded backup data	["BJFT90756189"]
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application.OmniBoxNew_degrade]	OmniBoxNewHouses::hdicHouseRelatedSubwayStation do not deploy	["BJFT90756189"]
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application]	OmniBoxNewHouses::schools4houseinfo is sync arrived!
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application.OmniBoxNew_degrade]	set degraded backup data	["BJFT90756189"]
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application.OmniBoxNew_degrade]	OmniBoxNewHouses::schools4houseinfo do not deploy	["BJFT90756189"]
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application]	ts return in 1.0ms	"test=test2&cdn=1&list=2&hl=1"
+INFO: 2016-05-09 19:00:02 ip[61.51.142.140] token[1339726211] [application]	OmniBoxNewAgents::agentDBInfo ids (cache miss)	["20008288","10134498"]
+
+# detail, detail_id能不能用?
+INFO:	2016-05-09 20:59:33	ip[180.153.235.47]	token[286236647]	[bigdata.detail]	_	{"uuid":"18c33c48e837e9c16dbb4676348d38eb","session_id":"c9fd15e3cce70e57e47a6d5bc789e0e5","user_id":null,"city_id":110000,"out_source_website":"","referer_url":"http:\/\/bj.fang.lianjia.com\/","current_url":"http:\/\/bj.fang.lianjia.com\/loupan\/p_bhyjqsqhaadjk","referer_page":0,"current_page":6,"channel_id":3,"is_search":0,"keywords":null,"out_source_type":4,"out_keywords":null,"detail_id":"p_bhyjqsqhaadjk","detail_id_type":1}
+INFO:	2016-05-09 20:59:34	ip[218.205.17.206]	token[596542290]	[bigdata.detail]	_	{"uuid":"1c55c266b806d291282499184020a0b5","session_id":"4bba961547e327d97ee7ea32f8223457","user_id":null,"city_id":120000,"out_source_website":"","referer_url":"","current_url":"http:\/\/tj.fang.lianjia.com\/loupan\/p_hgcaaghw\/","referer_page":0,"current_page":6,"channel_id":3,"is_search":0,"keywords":null,"out_source_type":4,"out_keywords":"","detail_id":"p_hgcaaghw","detail_id_type":1}
+
+# mobile
+INFO:	2016-08-09 06:22:55	ip[202.128.98.135]	token[405095653]	[bigdata.mobile]	_	{"uuid":"355848066190219","user_id":"2000000007329150","timestamp":1470694975,"os_type":"1","os_version":"5.1.1","app_version":"6.15.3","app_source_type":"","device_type":"samsung SM-N9100","network_type":2,"latitude":1.443358,"longitude":103.773264,"events":"[{\"timestamp\":1464398402,\"event_id\":5,\"current_page\":\"2nd_hand_house_list\",\"duration\":43,\"channel_id\":2,\"city_id\":\"370101\"},{\"timestamp\":1465034035,\"event_id\":4},{\"timestamp\":1465034037,\"event_id\":5,\"current_page\":\"com.homelink.android.SplashScreenActivity\",\"duration\":1,\"channel_id\":0,\"city_id\":\"370101\"},{\"timestamp\":1465034039,\"event_id\":6,\"channel_id\":1,\"current_page\":\"homepage\",\"event_name\":\"keyword_search\",\"city_id\":\"370101\"},{\"timestamp\":1465034039,\"event_id\":5,\"current_page\":\"homepage\",\"duration\":1,\"channel_id\":1,\"city_id\":\"370101\"}]"}
+INFO:	2016-08-09 06:22:57	ip[122.88.26.87]	token[273466862]	[bigdata.mobile]	_	{"timestamp":1470694975,"network_type":2,"events":"[{\"timestamp\":1466559733,\"city_id\":\"320100\",\"filter_items\":\"{\\\"channel\\\":\\\"ershoufang\\\",\\\"city_id\\\":\\\"320100\\\",\\\"community_id\\\":\\\"1411000000297\\\",\\\"conditionsHistory\\\":{\\\"empty\\\":false,\\\"queryStr\\\":\\\"汇贤居\\\",\\\"title\\\":\\\"汇贤居\\\"},\\\"is_suggestion\\\":1,\\\"limit_count\\\":20,\\\"limit_offset\\\":0,\\\"query_str\\\":\\\"汇贤居\\\"}\",\"keywords\":\"汇贤居\",\"detail_id\":\"103100368806\",\"referer_page\":\"2nd_hand_house_list\",\"event_id\":1,\"is_search\":1,\"search_position\":1,\"detail_id_type\":1,\"current_page\":\"2nd_hand_house_detail\",\"channel_id\":2},{\"timestamp\":1466559733,\"city_id\":\"320100\",\"event_id\":5,\"duration\":3,\"current_page\":\"2nd_hand_house_list\",\"channel_id\":2},{\"timestamp\":1466559734,\"city_id\":\"320100\",\"filter_items\":\"{\\\"channel\\\":\\\"ershoufang\\\",\\\"city_id\\\":\\\"320100\\\",\\\"community_id\\\":\\\"1411000000297\\\",\\\"conditionsHistory\\\":{\\\"empty\\\":false,\\\"queryStr\\\":\\\"汇贤居\\\",\\\"title\\\":\\\"汇贤居\\\"},\\\"is_suggestion\\\":1,\\\"limit_count\\\":20,\\\"limit_offset\\\":0,\\\"query_str\\\":\\\"汇贤居\\\"}\",\"keywords\":\"汇贤居\",\"detail_id\":\"103100368806\",\"referer_page\":\"2nd_hand_house_list\",\"event_id\":1,\"is_search\":1,\"search_position\":1,\"detail_id_type\":1,\"current_page\":\"2nd_hand_house_detail\",\"channel_id\":2},{\"timestamp\":1466559734,\"city_id\":\"320100\",\"event_id\":5,\"duration\":0,\"current_page\":\"2nd_hand_house_detail\",\"channel_id\":2},{\"timestamp\":1466559739,\"city_id\":\"320100\",\"event_id\":6,\"event_name\":\"visit_record\",\"channel_id\":2,\"current_page\":\"2nd_hand_house_detail\"}]","device_type":"Huawei HUAWEI P7-L07","app_source_type":"HomeLink","app_version":"6.12.4","longitude":118.795543,"latitude":32.102417,"uuid":"357457045653988","os_version":"4.4.2","os_type":"1"}
+INFO:	2016-08-09 06:22:59	ip[221.218.74.211]	token[1567693368]	[bigdata.mobile]	_	{"timestamp":1470694978,"network_type":2,"events":"[{\"timestamp\":1470652899,\"city_id\":\"110000\",\"event_id\":6,\"event_name\":\"keyword_search\",\"channel_id\":1,\"current_page\":\"homepage\"},{\"timestamp\":1470652899,\"city_id\":\"110000\",\"event_id\":5,\"duration\":4,\"current_page\":\"homepage\",\"channel_id\":1},{\"timestamp\":1470652899,\"city_id\":\"110000\",\"event_id\":5,\"duration\":5,\"current_page\":\"com.homelink.android.MainActivity\",\"channel_id\":1},{\"timestamp\":1470652904,\"city_id\":\"110000\",\"keywords\":\"\",\"search_source\":0,\"event_id\":2,\"sug_position\":-1,\"result_numbers\":0,\"use_sug\":0,\"channel_id\":1},{\"timestamp\":1470652904,\"city_id\":\"110000\",\"event_id\":5,\"duration\":4,\"current_page\":\"search_suggest\",\"channel_id\":1}]","device_type":"Huawei PE-TL10","app_source_type":"","app_version":"6.15.3","longitude":116.267606,"user_id":"2000000000927963","latitude":39.901145,"uuid":"864601020830717","os_version":"4.4.2","os_type":"1"}
+
+
+# /home/flume/mobile, 1150w左右(detail, search, follow, click) docs weekly
+# /home/flume/follow, 2.7w docs weekly
+# /home/flume/detail, 2664w docs weekly
+# /home/flume/search, 7689w docs weekly. 执行一个返回300条激素的kv查询需要5s -> 改为daily todo: 解析filter_item
+
+# /home/flume/pagevisit 10397w docs weekly
+# /home/flume/open
+# /home/flume/m_site_log
+# /home/flume/click
+
+# hbase table, 一周
+# data: 2.3G
+# idx: 3.2G
+
+
