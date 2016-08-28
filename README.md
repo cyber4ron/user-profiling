@@ -9,3 +9,4 @@ Introduction slide: https://docs.google.com/presentation/d/1s82pxtCsOOxMiF8D6Y_-
 ## real-time preference tagging
 
 ## cross-device user identification
+<img src="https://github.com/cyber4ron/notes/blob/master/images/uuid-ucid-assoc.png" width="400">
