@@ -1,0 +1,16 @@
+{
+  "_source": {
+    "enabled": true
+  },
+  "_all": {
+    "enabled": false
+  },
+  "properties": {
+    "ucid": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    }
+  }
+}

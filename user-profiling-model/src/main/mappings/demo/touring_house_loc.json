@@ -1,0 +1,32 @@
+{
+  "loc": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "phone": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "ucid": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "house_id": {
+        "type": "boolean"
+      },
+      "resblock_id": {
+        "type": "boolean"
+      },
+      "loc": {
+        "type": "geo_point"
+      },
+      "write": {
+        "type": "boolean"
+      }
+    }
+  }
+}

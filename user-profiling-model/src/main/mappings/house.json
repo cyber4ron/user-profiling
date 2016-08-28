@@ -1,0 +1,164 @@
+{
+  "house": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "house_id": {
+        "type": "string"
+      },
+      "hdic_id": {
+        "type": "long"
+      },
+      "creation_ucid": {
+        "type": "long"
+      },
+      "creation_code": {
+        "type": "long"
+      },
+      "status": {
+        "type": "string"
+      },
+      "creation_date": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "invalid_date": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "update_date": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "biz_type": {
+        "type": "long"
+      },
+      "list_price": {
+        "type": "double"
+      },
+      "orient_id": {
+        "type": "long"
+      },
+      "bedr_num": {
+        "type": "integer"
+      },
+      "livingr_num": {
+        "type": "integer"
+      },
+      "kitchen_num": {
+        "type": "integer"
+      },
+      "bathr_num": {
+        "type": "integer"
+      },
+      "balcony_num": {
+        "type": "integer"
+      },
+      "area": {
+        "type": "double"
+      },
+      "district_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "district_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bizcircle_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bizcircle_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "resblock_id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "resblock_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "building_id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "building_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "unit_code": {
+        "type": "string"
+      },
+      "unit_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "floor_no": {
+        "type": "string"
+      },
+      "floor_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "house_usage_code": {
+        "type": "string"
+      },
+      "house_usage_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "floors_num": {
+        "type": "integer"
+      },
+      "completed_year": {
+        "type": "integer"
+      },
+      "has_sale_tax": {
+        "type": "integer"
+      },
+      "metro_dist_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "metro_dist_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "is_school_district": {
+        "type": "integer"
+      },
+      "fitment_type_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "fitment_type_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "city_id": {
+        "type": "long"
+      },
+      "city_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "is_unique": {
+        "type": "integer"
+      },
+      "app_id": {
+        "type": "long"
+      },
+      "write_ts": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      }
+    }
+  }
+}

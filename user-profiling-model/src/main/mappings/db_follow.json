@@ -1,0 +1,39 @@
+{
+  "_source": {
+    "enabled": true
+  },
+  "_all": {
+    "enabled": false
+  },
+  "properties": {
+    "fid": {
+      "type": "integer"
+    },
+    "ucid": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "type": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "target": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "src": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "ctime": {
+      "type": "date",
+      "format": "basic_date_time_no_millis"
+    },
+    "mtime": {
+      "type": "date",
+      "format": "basic_date_time_no_millis"
+    }
+  }
+}

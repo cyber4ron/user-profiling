@@ -1,0 +1,20 @@
+{
+  "_source": {
+    "enabled": true
+  },
+  "_all": {
+    "enabled": false
+  },
+  "properties": {
+    "topic": {
+      "type": "string"
+    },
+    "partition_id": {
+      "type": "integer"
+    },
+    "consumed_offset": {
+      "type": "long",
+      "index":  "no"
+    }
+  }
+}

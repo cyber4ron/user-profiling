@@ -1,0 +1,76 @@
+{
+  "_source": {
+    "enabled": true
+  },
+  "_all": {
+    "enabled": false
+  },
+  "properties": {
+    "house_id": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "hdic_house_id": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "city_id": {
+      "type": "long"
+    },
+    "room_num": {
+      "type": "integer"
+    },
+    "area": {
+      "type": "integer"
+    },
+    "price_lv1": {
+      "type": "integer"
+    },
+    "price_lv2": {
+      "type": "integer"
+    },
+    "price_lv3": {
+      "type": "integer"
+    },
+    "floor": {
+      "type": "integer"
+    },
+    "orient": {
+      "type": "integer"
+    },
+    "bd_age": {
+      "type": "integer"
+    },
+    "district": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "bizcircle": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "resblock": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "unique": {
+      "type": "integer"
+    },
+    "school": {
+      "type": "integer"
+    },
+    "metro": {
+      "type": "integer"
+    },
+    "biz_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "write_ts": {
+      "type": "date",
+      "format": "basic_date_time_no_millis"
+    }
+  }
+}

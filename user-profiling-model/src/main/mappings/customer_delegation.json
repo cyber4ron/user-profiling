@@ -1,0 +1,101 @@
+{
+  "delegation": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "phone": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "name": {
+        "type": "string"
+      },
+      "del_id": {
+        "type": "string"
+      },
+      "state": {
+        "type": "long"
+      },
+      "creation_time": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "invalid_time": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "update_time": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "creator_uid": {
+        "type": "long"
+      },
+      "creator_code": {
+        "type": "long"
+      },
+      "invalidator_uid": {
+        "type": "long"
+      },
+      "updater_uid": {
+        "type": "long"
+      },
+      "updater_code": {
+        "type": "long"
+      },
+      "biz_type": {
+        "type": "long"
+      },
+      "city_id": {
+        "type": "long"
+      },
+      "app_id": {
+        "type": "long"
+      },
+      "district_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "district": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "biz_circle": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "room_min": {
+        "type": "integer"
+      },
+      "room_max": {
+        "type": "integer"
+      },
+      "area_min": {
+        "type": "float"
+      },
+      "area_max": {
+        "type": "float"
+      },
+      "price_min": {
+        "type": "float"
+      },
+      "price_max": {
+        "type": "float"
+      },
+      "balcony_need": {
+        "type": "long"
+      },
+      "orientation": {
+        "type": "long"
+      },
+      "write_ts": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "_source": {
+    "enabled": true
+  },
+  "_all": {
+    "enabled": false
+  },
+  "properties": {
+    "phone": {
+      "type": "string"
+    },
+    "ucid": {
+      "type": "string"
+    },
+    "time_tag": {
+      "type": "string"
+    },
+    "district": {
+      "type": "string"
+    },
+    "distr_cbf": {
+      "type": "binary"
+    },
+    "bizcircle": {
+      "type": "string"
+    },
+    "bizcircle_cbf": {
+      "type": "binary"
+    },
+    "resblock": {
+      "type": "string"
+    },
+    "resblock_cbf": {
+      "type": "binary"
+    },
+    "room": {
+      "type": "string"
+    },
+    "room_stat": {
+      "type": "binary"
+    },
+    "area": {
+      "type": "string"
+    },
+    "area_stat": {
+      "type": "binary"
+    },
+    "price": {
+      "type": "string"
+    },
+    "price_stat": {
+      "type": "binary"
+    },
+    "floor": {
+      "type": "string"
+    },
+    "orient": {
+      "type": "string"
+    },
+    "orient_stat": {
+      "type": "binary"
+    },
+    "bd_years": {
+      "type": "string"
+    },
+    "bd_years_stat": {
+      "type": "binary"
+    },
+    "sole": {
+      "type": "string"
+    },
+    "sole_stat": {
+      "type": "binary"
+    },
+    "school": {
+      "type": "string"
+    },
+    "school_stat": {
+      "type": "binary"
+    },
+    "metro": {
+      "type": "string"
+    },
+    "metro_stat": {
+      "type": "binary"
+    },
+    "seller_prob": {
+      "type": "string"
+    },
+    "buyer_prob": {
+      "type": "string"
+    },
+    "losing_prob": {
+      "type": "string"
+    },
+    "wtb": {
+      "type": "string"
+    }
+  }
+}

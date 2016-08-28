@@ -1,0 +1,123 @@
+{
+  "touring": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "phone": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "touring_id": {
+        "type": "string"
+      },
+      "touring_house_id": {
+        "type": "string"
+      },
+      "creation_ucid": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "creation_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "creation_date": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      },
+      "city_id": {
+        "type": "long"
+      },
+      "house_id": {
+        "type": "string"
+      },
+      "hdic_house_id": {
+        "type": "long"
+      },
+      "biz_type": {
+        "type": "long"
+      },
+      "structure_type": {
+        "type": "long"
+      },
+      "feedback_type": {
+        "type": "long"
+      },
+      "district_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "district_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bizcircle_id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "bizcircle_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "resblock_id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "resblock_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "room_cnt": {
+        "type": "integer"
+      },
+      "area": {
+        "type": "float"
+      },
+      "floor_no": {
+        "type": "string"
+      },
+      "floor_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "floors_num": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "completed_year": {
+        "type": "integer"
+      },
+      "has_sale_tax": {
+        "type": "integer"
+      },
+      "metro_dist_code": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "metro_dist_name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "is_school_district": {
+        "type": "integer"
+      },
+      "is_unique": {
+        "type": "integer"
+      },
+      "orient_id": {
+        "type": "long"
+      },
+      "list_price": {
+        "type": "float"
+      },
+      "write_ts": {
+        "type": "date",
+        "format": "basic_date_time_no_millis"
+      }
+    }
+  }
+}

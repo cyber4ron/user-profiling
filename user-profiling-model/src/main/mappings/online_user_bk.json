@@ -1,0 +1,421 @@
+{
+  "mappings": {
+    "usr": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        }
+      }
+    },
+    "mod_usr": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        }
+      }
+    },
+    "pv": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "type": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        },
+        "kws": {
+          "type": "string"
+        }
+      }
+    },
+    "dtl": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "type": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        },
+        "kws": {
+          "type": "string"
+        },
+        "dtl_id": {
+          "type": "string"
+        },
+        "dtl_id_type": {
+          "type": "string"
+        }
+      }
+    },
+    "srh": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        },
+        "out_kws": {
+          "type": "string"
+        },
+        "kws": {
+          "type": "string"
+        }
+      }
+    },
+    "fl": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "fl_id": {
+          "type": "string"
+        },
+        "fl_act": {
+          "type": "string"
+        },
+        "fl_type": {
+          "type": "string"
+        }
+      }
+    },
+    "mob_dtl": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "loc": {
+          "type": "geo_point"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        },
+        "kws": {
+          "type": "string"
+        },
+        "dtl_id": {
+          "type": "string"
+        },
+        "dtl_type": {
+          "type": "string"
+        }
+      }
+    },
+    "mob_srh": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "loc": {
+          "type": "geo_point"
+        },
+        "kws": {
+          "type": "string"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        }
+      }
+    },
+    "mob_fl": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "loc": {
+          "type": "geo_point"
+        },
+        "fl_id": {
+          "type": "string"
+        },
+        "fl_act": {
+          "type": "string"
+        },
+        "fl_type": {
+          "type": "string"
+        }
+      }
+    },
+    "mob_lch": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "loc": {
+          "type": "geo_point"
+        }
+      }
+    },
+    "mob_drt": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "loc": {
+          "type": "geo_point"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        },
+        "drt": {
+          "type": "string"
+        }
+      }
+    },
+    "mob_clk": {
+      "_source": {
+        "enabled": true
+      },
+      "_all": {
+        "enabled": false
+      },
+      "properties": {
+        "ucid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "uuid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ts": {
+          "type": "date",
+          "format": "epoch_millis"
+        },
+        "os": {
+          "type": "string"
+        },
+        "loc": {
+          "type": "geo_point"
+        },
+        "city_id": {
+          "type": "string"
+        },
+        "ch_id": {
+          "type": "string"
+        },
+        "current_page": {
+          "type": "string"
+        },
+        "evt_name": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

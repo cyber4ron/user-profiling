@@ -1,0 +1,129 @@
+{
+  "_source": {
+    "enabled": true
+  },
+  "_all": {
+    "enabled": false
+  },
+  "properties": {
+    "phone": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "ucid": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "city_id": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "time_slot": {
+      "type": "date",
+      "format": "basic_date_time_no_millis"
+    },
+    "room_num": {
+      "type": "integer"
+    },
+    "room_num_cnt": {
+      "type": "binary"
+    },
+    "area": {
+      "type": "integer"
+    },
+    "area_cnt": {
+      "type": "binary"
+    },
+    "price_lv1": {
+      "type": "integer"
+    },
+    "price_lv1_cnt": {
+      "type": "binary"
+    },
+    "price_lv2": {
+      "type": "integer"
+    },
+    "price_lv2_cnt": {
+      "type": "binary"
+    },
+    "price_lv3": {
+      "type": "integer"
+    },
+    "price_lv3_cnt": {
+      "type": "binary"
+    },
+    "floor": {
+      "type": "integer"
+    },
+    "floor_cnt": {
+      "type": "binary"
+    },
+    "orient": {
+      "type": "integer"
+    },
+    "orient_cnt": {
+      "type": "binary"
+    },
+    "bd_age": {
+      "type": "integer"
+    },
+    "bd_age_cnt": {
+      "type": "binary"
+    },
+    "district": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "district_cbf": {
+      "type": "binary"
+    },
+    "bizcircle": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "bizcircle_cbf": {
+      "type": "binary"
+    },
+    "resblock": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "resblock_cbf": {
+      "type": "binary"
+    },
+    "unique": {
+      "type": "int"
+    },
+    "unique_cnt": {
+      "type": "binary"
+    },
+    "school": {
+      "type": "int"
+    },
+    "school_cnt": {
+      "type": "binary"
+    },
+    "metro": {
+      "type": "int"
+    },
+    "metro_cnt": {
+      "type": "binary"
+    },
+    "seller_prob": {
+      "type": "float"
+    },
+    "buyer_prob": {
+      "type": "float"
+    },
+    "losing_prob": {
+      "type": "float"
+    },
+    "wtb": {
+      "type": "float"
+    },
+    "write_ts": {
+      "type": "date",
+      "format": "basic_date_time_no_millis"
+    }
+  }
+}
