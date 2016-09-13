@@ -72,6 +72,11 @@ public class DateUtil {
         return null;
     }
 
+    public static DateTime parseDateTime(long tsMs) {
+        if (tsMs < 1E12 || tsMs > 1E13) return null;
+        return new DateTime(tsMs);
+    }
+
     public static boolean isValidDate(String date) {
         return parseDate(date) != null;
     }
@@ -86,6 +91,10 @@ public class DateUtil {
 
     public static String getOneDayBefore() {
         return DATE_FMT.print(new DateTime().minusDays(2));
+    }
+
+    public static String getDaysBefore(int days) {
+        return DATE_FMT.print(new DateTime().minusDays(days));
     }
 
     public static String getOneDayBefore(DateTime date) {

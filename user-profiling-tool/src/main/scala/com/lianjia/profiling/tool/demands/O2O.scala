@@ -44,46 +44,51 @@ object O2O extends App {
   "111400101800",
   "111400800900")
 
-  val contractSql = s"""
-                       |select del.phone_a,
-                       |contr.deal_time
-                       |from (select cott_pkid,
-                       |             case length(cust_pkid)
-                       |                 when 10 then concat('5010', substr(cust_pkid, -8))
-                       |                 when 11 then concat('501', substr(cust_pkid, -9))
-                       |                 when 12 then concat('50', substr(cust_pkid, -10))
-                       |                 else null
-                       |             end as cust_pkid,
-                       |             deal_time
-                       |      from data_center.dim_merge_contract_day ct
-                       |      where ct.pt = '${date}000000') contr
-                       |join data_center.dim_merge_custdel_day as del
-                       |on contr.cust_pkid = del.cust_pkid
-                       |and contr.deal_time >= '20160701' and contr.deal_time <= '20160801'
-                       |and del.pt = '${date}000000'
+  val contractSql =
+    s"""
+       |select del.phone_a,
+       |contr.deal_time
+       |from (select cott_pkid,
+       |             case length(cust_pkid)
+       |                 when 10 then concat('5010', substr(cust_pkid, -8))
+       |                 when 11 then concat('501', substr(cust_pkid, -9))
+       |                 when 12 then concat('50', substr(cust_pkid, -10))
+       |                 else null
+       |             end as cust_pkid,
+       |             deal_time
+       |      from data_center.dim_merge_contract_day ct
+       |      where city_id = 110000 and ct.pt = '${date}000000') contr
+       |join data_center.dim_merge_custdel_day as del
+       |on contr.cust_pkid = del.cust_pkid
+       |and contr.deal_time >= '20160701' and contr.deal_time <= '20160801'
+       |and del.pt = '${date}000000'
                     """.stripMargin
 
   // delegation with source
-  val delegationSql = s"""select
-                          |del.phone_a,
-                          |min(cust.delegation_source_child)
-                          |from data_center.dim_merge_custdel_day as del
-                          |join data_center.t_cm_cust_basic as cust
-                          |on del.phone_a = cust.phone1
-                          |and del.created_time >= '2016-07-01 00:00:00' and del.created_time <= '2016-08-01 00:00:00'
-                          |and del.pt = '${date}000000'
-                          |and cust.pt = '${date}000000'
-                          |group by del.phone_a
-                          |""".stripMargin
+  val delegationSql =
+    s"""select
+        |del.phone_a,
+        |min(cust.delegation_source_child)
+        |from data_center.dim_merge_custdel_day as del
+        |join data_center.t_cm_cust_basic as cust
+        |on del.phone_a = cust.phone1
+        |and del.city_id = 110000
+        |and del.created_time >= '2016-07-01 00:00:00' and del.created_time <= '2016-08-01 00:00:00'
+        |and del.pt = '${date}000000'
+        |and cust.pt = '${date}000000'
+        |group by del.phone_a
+        |""".stripMargin
 
-  val delegationCntSql = s"""select
-                             |del.phone_a,
-                             |count(*)
-                             |from data_center.dim_merge_custdel_day as del
-                             |where del.created_time >= '2016-06-01 00:00:00' and del.created_time <= '2016-08-01 00:00:00'
-                             |and del.pt = '${date}000000'
-                             |group by del.phone_a
-                             |""".stripMargin
+  val delegationCntSql =
+    s"""select
+        |del.phone_a,
+        |count(*)
+        |from data_center.dim_merge_custdel_day as del
+        |where del.created_time >= '2016-06-01 00:00:00' and del.created_time <= '2016-08-01 00:00:00'
+        |and city_id = 110000
+        |and del.pt = '${date}000000'
+        |group by del.phone_a
+        |""".stripMargin
 
   // contr - phone
   val contract = sqlContext.sql(contractSql) map { row =>
@@ -100,12 +105,13 @@ object O2O extends App {
   val delegationCnt = sqlContext.sql(delegationCntSql) map {row =>
     (row.getString(0), row.getLong(1))
   }
+  delegationCnt persist StorageLevel.MEMORY_AND_DISK
 
-  val xx = contract.map((_, "")) join delegationCnt map {
+  val contrDelCnt = contract.map((_, "")) join delegationCnt map {
     case (phone, (_, cnt)) => (phone, cnt)
   }
 
-  xx persist StorageLevel.MEMORY_AND_DISK
+  contrDelCnt persist StorageLevel.MEMORY_AND_DISK
 
   delegation persist StorageLevel.MEMORY_AND_DISK
 
@@ -120,7 +126,10 @@ object O2O extends App {
     (parts(1), parts(0))
  }
 
-  val joined =  contract.map((_, "")).join(phone_ucid) map { case (phone, (ts, ucid)) => (ucid, (ts, phone)) }
+  phone_ucid persist StorageLevel.MEMORY_AND_DISK
+
+  val joined =  contract.map((_, "")).join(phone_ucid) map { case (phone, (ts, ucid)) => (ucid, phone) }
+  // val joined =  delegationOffline.join(phone_ucid) map { case (phone, (_, ucid)) => (ucid, phone) }
   joined.persist(StorageLevel.MEMORY_AND_DISK)
 
   val days = 31
@@ -131,11 +140,12 @@ object O2O extends App {
 
   val data = sc.textFile(dataPaths.mkString(","))
 
+  // => (ucid, cnt)
   val dtl = data flatMap { line =>
     val parts = line.split("\t")
     if (parts.length == 2) {
       val obj = JSON.parseObject(parts(1))
-      if (obj.containsKey("ucid") && ( parts(0) == "dtl" ||  parts(0) == "mob_dtl"))
+      if (obj.containsKey("ucid") && (parts(0) == "dtl" ||  parts(0) == "mob_dtl"))
         Array[String](obj.getString("ucid"))
       else Array.empty[String]
     }
@@ -144,14 +154,14 @@ object O2O extends App {
 
   dtl.persist(StorageLevel.MEMORY_AND_DISK)
 
-  val onlineCnt = joined.join(dtl) map { case (ucid, ((ts, phone), cnt)) =>
+  val onlineCnt = joined.join(dtl) map { case (ucid, (phone, cnt)) =>
     (phone, cnt)
   }
 
-  xx join onlineCnt map {
-    case (phone, (delCnt, dtlCnt)) => s"$phone\t$delCnt\t$dtlCnt"
-  } saveAsTextFile "/user/bigdata/profiling/haichao21"
+  contrDelCnt leftOuterJoin onlineCnt map {
+    case (phone, (delCnt, dtlCnt)) => s"$phone\t$delCnt\t${dtlCnt.getOrElse(0)}"
+  } saveAsTextFile "/user/bigdata/profiling/haichao4"
 
   // conversion map {case (a, b) => s"$a\t$b"} saveAsTextFile "/user/bigdata/profiling/haichao_online_channel"
-  users map {case (a, b) => s"$a"} saveAsTextFile "/user/bigdata/profiling/haichao_users"
+  // users map {case (a, b) => s"$a"} saveAsTextFile "/user/bigdata/profiling/haichao_users"
 }

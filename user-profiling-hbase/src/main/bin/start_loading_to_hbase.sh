@@ -47,5 +47,7 @@ export HADOOP_USER_NAME=bigdata && nohup ${SPARK_HOME}/bin/spark-submit \
 --conf spark.logging.host=172.16.5.21 \
 --conf spark.logging.port=50051 \
 --conf spark.backtrace.date=${date} \
+--conf spark.backtrace.userEvents=true \
+--conf spark.backtrace.userPrefer=true \
 --conf spark.executor.extraJavaOptions="-XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC" \
 ${JAR_DIR}/user-profiling-hbase-${VERSION}.jar > ${LOG_DIR}/load_to_hbase_${date}.log 2>&1 &

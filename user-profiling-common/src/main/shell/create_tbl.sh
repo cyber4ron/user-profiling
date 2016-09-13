@@ -19,3 +19,7 @@ scan 'hbase:meta',{FILTER=>"PrefixFilter('profiling:event_online')"}
 # info:regioninfo - This qualifier contains STARTKEY and ENDKEY.
 #
 # info:server - This qualifier contains region server details
+
+create 'profiling:online_user_prefer_201608v2', { NAME=>'prf', BLOOMFILTER => 'ROW', VERSIONS => '1'}, { MAX_FILESIZE => '10737418240' }
+
+create 'profiling:online_user_event_201608', { NAME=>'evt', BLOOMFILTER => 'ROW', VERSIONS => '2147483647'}, { MAX_FILESIZE => '10737418240' }

@@ -9,6 +9,7 @@ import com.lianjia.profiling.common.elasticsearch.index.IndexRoller
 import com.lianjia.profiling.common.ha.CustomHAManager
 import com.lianjia.profiling.common.hbase.client.BlockingBatchWriteHelper
 import com.lianjia.profiling.common.hbase.roller.OnlineUserTableRoller
+import com.lianjia.profiling.common.redis.PipelinedJedisClient
 import com.lianjia.profiling.config.Constants
 import com.lianjia.profiling.stream.LineHandler
 import com.lianjia.profiling.stream.Stream._
@@ -143,9 +144,11 @@ object OnlineUserBacktrace {
       val esProxy = new BlockingBackoffRetryProxy(conf)
       val hbaseProxy = new BlockingBatchWriteHelper(onlineUserTblListener.getTable)
       val hbaseIndexProxy = new BlockingBatchWriteHelper(onlineUserTblListener.getTableIdx)
+      val redisClient = new PipelinedJedisClient
 
       val toES = java.lang.Boolean.parseBoolean(conf.getOrElse[String]("spark.backtrace.to.es", "false"))
       val toHBase = java.lang.Boolean.parseBoolean(conf.getOrElse[String]("spark.backtrace.to.hbase", "false"))
+      val toRedis = java.lang.Boolean.parseBoolean(conf.getOrElse[String]("spark.backtrace.to.redis", "false"))
 
       val docs = new util.ArrayList[OnlineUserEventBuilder.Doc]()
       partition foreach { line =>
@@ -154,7 +157,7 @@ object OnlineUserBacktrace {
             case x if x contains "[bigdata." => // 应该都有这个tag
               linesOnlineUser += 1
               docs.addAll(LineHandler.processOnlineUser(line,
-                                                        esProxy, hbaseProxy, hbaseIndexProxy,
+                                                        esProxy, hbaseProxy, hbaseIndexProxy, redisClient,
                                                         indexListener, FlumeOnlineUserMessageParser.parse,
                                                         toES, toHBase))
             case _ =>
@@ -169,6 +172,7 @@ object OnlineUserBacktrace {
       // purge
       if (toES) hbaseProxy.flush()
       if (toHBase) esProxy.flush()
+      if (toRedis) redisClient.flush()
 
       // log
       logger.info(s"lines of online user: $linesOnlineUser")

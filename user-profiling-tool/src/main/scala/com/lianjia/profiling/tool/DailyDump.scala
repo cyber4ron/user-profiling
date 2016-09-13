@@ -75,7 +75,9 @@ object DailyDump extends App {
 
   def dumpToHdfs() {
     Map("customer/customer" -> s"/user/bigdata/profiling/customer_$date",
-        "house/house" -> s"/user/bigdata/profiling/house_$date") foreach {
+        "house/house" -> s"/user/bigdata/profiling/house_$date",
+        "customer_touring/touring" -> s"/user/bigdata/profiling/touring_$date",
+        "db_follow/fl" -> s"/user/bigdata/profiling/follow_$date") foreach {
       case (res, path) =>
         saveToHDFS(res, path)
         touchFile(s"$path/_success")

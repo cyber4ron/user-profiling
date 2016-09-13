@@ -24,7 +24,7 @@ public abstract class TaggingBase {
     private static final Logger LOG = LoggerFactory.getLogger(TaggingBase.class.getName());
 
     @SuppressWarnings("Duplicates")
-    protected static void updatePrice(UserPreference prefer, Map<String, Object> event, String fieldName, double weight) {
+    protected static void updatePrice(UserPreference prefer, Map<String, Object> event, String fieldName, float weight) {
         if (event.containsKey("city_id") && event.containsKey(fieldName)) {
             String cityId = event.get("city_id").toString();
             int idx = getPriceIdx(event.get("city_id").toString(),
@@ -46,7 +46,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateArea(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateArea(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("area")) {
             int idx = getAreaIdx(Double.parseDouble(event.get("area").toString()));
             if (idx == -1) {
@@ -57,7 +57,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateFloor(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateFloor(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("floor_name") && event.containsKey("floors_num")) {
             int idx = getRelativeFloorLevel(Integer.parseInt(event.get("floor_name").toString()),
                                             Integer.parseInt(event.get("floors_num").toString()));
@@ -70,7 +70,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateOrient(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateOrient(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("orient_id")) {
             int idx = getOrientIdx(Long.parseLong(event.get("orient_id").toString()));
             if (idx == -1) {
@@ -81,7 +81,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateRoomNum(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateRoomNum(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("room_num")) {
             int idx = getRoomNumIdx(Integer.parseInt(event.get("room_num").toString()));
             if (idx == -1) {
@@ -92,7 +92,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateBedroomNum(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateBedroomNum(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("bedr_num")) {
             int idx = getRoomNumIdx(Integer.parseInt(event.get("bedr_num").toString()));
             if (idx == -1) {
@@ -103,7 +103,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateBuildingAge(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateBuildingAge(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("completed_year")) {
             int idx = getBuildingAgeIdx(getDate(event, new String[]{"creation_date"}),
                                         Integer.parseInt(event.get("completed_year").toString()));
@@ -115,13 +115,13 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateId(UserPreference prefer, Map<String, Object> event, String fieldName, UserTag field, double weight) {
+    protected static void updateId(UserPreference prefer, Map<String, Object> event, String fieldName, UserTag field, float weight) {
         if (event.containsKey(fieldName)) {
             prefer.update(field, event.get(fieldName), weight);
         }
     }
 
-    protected static void updateBool(UserPreference prefer, Map<String, Object> event, String fieldName, UserTag field, double weight) {
+    protected static void updateBool(UserPreference prefer, Map<String, Object> event, String fieldName, UserTag field, float weight) {
         if (event.containsKey(fieldName)) {
             String val = event.get(fieldName).toString();
             if (!isBoolValueValid(val)) {
@@ -132,7 +132,7 @@ public abstract class TaggingBase {
         }
     }
 
-    protected static void updateMetro(UserPreference prefer, Map<String, Object> event, double weight) {
+    protected static void updateMetro(UserPreference prefer, Map<String, Object> event, float weight) {
         if (event.containsKey("metro_dist_name")) {
             int isMetro = isMetro(event.get("metro_dist_name").toString()); // todo: metro_dist_code
             if (isMetro == -1) {
@@ -141,5 +141,9 @@ public abstract class TaggingBase {
                 prefer.update(UserTag.METRO, isMetro, weight);
             }
         }
+    }
+
+    protected static void updateMeta(UserPreference prefer, UserTag key, Object value) {
+        prefer.updateMeta(key, value);
     }
 }

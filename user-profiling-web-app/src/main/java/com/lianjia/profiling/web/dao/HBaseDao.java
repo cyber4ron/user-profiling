@@ -2,6 +2,7 @@ package com.lianjia.profiling.web.dao;
 
 import com.alibaba.fastjson.JSON;
 import com.lianjia.profiling.common.hbase.client.HBaseClient;
+import com.lianjia.profiling.tagging.features.UserPreference;
 import com.lianjia.profiling.util.DateUtil;
 import com.lianjia.profiling.util.ZipUtil;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class HBaseDao {
     private static final Logger LOG = LoggerFactory.getLogger(HBaseDao.class.getName());
     private static final String ONLINE_USER_TBL_PREFIX = "online_user_";
+    private static final String ONLINE_USER_PREFER_TBL_PREFIX = "profiling:online_user_prefer_v3";
 
     private Map<String, HBaseClient> clients = new ConcurrentHashMap<>();
 
@@ -42,10 +44,10 @@ public class HBaseDao {
     public List<Map<String, Object>> getEvents(String table, String key) throws IOException {
         Map<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> res = getClient(table).get(key.getBytes());
         if (!res.containsKey("evt".getBytes())) return Collections.emptyList();
-        return res.get("evt".getBytes()).values().stream().flatMap(x -> x.values().stream())
+        return res.get("evt".getBytes()).values().parallelStream().flatMap(x -> x.values().stream())
                 .flatMap(val -> {
                     try {
-                        return Arrays.asList(ZipUtil.inflate(new String(val)).split("\t")).stream()
+                        return Arrays.asList(new String(ZipUtil.inflate(new String(val))).split("\t")).stream()
                                 .map(json -> {
                                     try {
                                         return JSON.parseObject(json).entrySet().stream()
@@ -66,9 +68,9 @@ public class HBaseDao {
 
     public List<Map<String, Object>> getEvents(String id, long start, long end) {
         return DateUtil.alignedByMonth(DateUtil.toApiDateTime(start),
-                                       DateUtil.toApiDateTime(end)).stream().flatMap(month -> {
+                                       DateUtil.toApiDateTime(end)).parallelStream().flatMap(month -> {
             try {
-                LOG.info("querying profiling:online_user_event_" + month + ", id: " + id);
+                // LOG.info("querying profiling:online_user_event_" + month + ", id: " + id);
                 List<Map<String, Object>> x = getEvents("profiling:online_user_event_" + month, id);
                 LOG.info("querying returned, profiling:online_user_event_" + month + ", id: " + id);
                 return x.stream();
@@ -78,5 +80,17 @@ public class HBaseDao {
             }
 
         }).filter(x -> x != null).collect(Collectors.toList());
+    }
+
+    public UserPreference getUserPrefer(String id) throws IOException, ClassNotFoundException {
+        Map<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> res = getClient(ONLINE_USER_PREFER_TBL_PREFIX).get(id.getBytes());
+        if (res.size() == 0) return new UserPreference();
+
+        byte[] bytes = (byte[]) res.get("prf".getBytes())
+                .get("".getBytes())
+                .values()
+                .toArray()[0];
+
+        return UserPreference.deserialize(ZipUtil.inflate(new String(bytes)));
     }
 }

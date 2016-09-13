@@ -26,8 +26,8 @@ public class HouseTagging {
             int idx = getPriceIdx(house.get("city_id").toString(),
                                   Double.parseDouble(house.get("list_price").toString()));
             if (idx == -1) {
-                LOG.warn(String.format("invalid arguments, city_id: %s, list_price: %s", house.get("city_id").toString(),
-                                       house.get("list_price").toString()));
+                // LOG.warn(String.format("invalid arguments, city_id: %s, list_price: %s", house.get("city_id").toString(),
+                //                        house.get("list_price").toString()));
             } else {
                 Class<?> range = PRICE_MAPPING.get(cityId);
                 if (PriceRangeLv1.class.isAssignableFrom(range)) prop.update(HouseTag.PRICE_LV1, idx);
@@ -46,7 +46,7 @@ public class HouseTagging {
         if (house.containsKey("area")) {
             int idx = getAreaIdx(Double.parseDouble(house.get("area").toString()));
             if (idx == -1) {
-                LOG.warn(String.format("invalid arguments, area: %s", house.get("area").toString()));
+                // LOG.warn(String.format("invalid arguments, area: %s", house.get("area").toString()));
             } else {
                 prop.update(HouseTag.AREA, idx);
             }
@@ -58,8 +58,8 @@ public class HouseTagging {
             int idx = getRelativeFloorLevel(Integer.parseInt(house.get("floor_name").toString()),
                                             Integer.parseInt(house.get("floors_num").toString()));
             if (idx == -1) {
-                LOG.warn(String.format("invalid arguments, floor_name: %s, floors_num: %s.", house.get("floor_name").toString(),
-                                       house.get("floors_num").toString()));
+                // LOG.warn(String.format("invalid arguments, floor_name: %s, floors_num: %s.", house.get("floor_name").toString(),
+                //                        house.get("floors_num").toString()));
             } else {
                 prop.update(HouseTag.FLOOR, idx);
             }
@@ -70,7 +70,7 @@ public class HouseTagging {
         if (house.containsKey("orient_id")) {
             int idx = getOrientIdx(Long.parseLong(house.get("orient_id").toString()));
             if (idx == -1) {
-                LOG.warn(String.format("invalid arguments, orient_id: %s.", house.get("orient_id").toString()));
+                // LOG.warn(String.format("invalid arguments, orient_id: %s.", house.get("orient_id").toString()));
             } else {
                 prop.update(HouseTag.ORIENT, idx);
             }
@@ -82,8 +82,8 @@ public class HouseTagging {
             int idx = getBuildingAgeIdx(getDate(house, new String[]{"creation_date"}),
                                         Integer.parseInt(house.get("completed_year").toString()));
             if (idx == -1) {
-                LOG.warn(String.format("invalid arguments, completed_year: %s.",
-                                       house.get("completed_year").toString()));
+                // LOG.warn(String.format("invalid arguments, completed_year: %s.",
+                //                        house.get("completed_year").toString()));
             } else {
                 prop.update(HouseTag.BUILDING_AGE, idx);
             }
@@ -100,10 +100,10 @@ public class HouseTagging {
         if (event.containsKey(fieldName)) {
             String val = event.get(fieldName).toString();
             if (!isBoolValueValid(val)) {
-                LOG.warn(String.format("invalid arguments, %s: %s.", fieldName, event.get(fieldName).toString()));
+                // LOG.warn(String.format("invalid arguments, %s: %s.", fieldName, event.get(fieldName).toString()));
             } else {
                 if(!val.equals("0") && !val.equals("1")) {
-                    LOG.warn("invalid bool field: " + val);
+                    // LOG.warn("invalid bool field: " + val);
                 } else {
                     prop.update(field, val.equals("1"));
                 }
@@ -115,7 +115,7 @@ public class HouseTagging {
         if (event.containsKey("metro_dist_name")) {
             int isMetro = isMetro(event.get("metro_dist_name").toString()); // todo: metro_dist_code
             if (isMetro == -1) {
-                LOG.warn(String.format("invalid arguments, metro_dist_name: %s.", event.get("metro_dist_name").toString()));
+                // LOG.warn(String.format("invalid arguments, metro_dist_name: %s.", event.get("metro_dist_name").toString()));
             } else {
                 prop.update(HouseTag.METRO, isMetro);
             }
@@ -126,7 +126,7 @@ public class HouseTagging {
         if (event.containsKey("bedr_num")) {
             int idx = getRoomNumIdx(Integer.parseInt(event.get("bedr_num").toString()));
             if (idx == -1) {
-                LOG.warn(String.format("invalid arguments, bedr_num: %s.", event.get("bedr_num").toString()));
+                // LOG.warn(String.format("invalid arguments, bedr_num: %s.", event.get("bedr_num").toString()));
             } else {
                 prop.update(HouseTag.ROOM_NUM, idx);
             }
@@ -137,7 +137,7 @@ public class HouseTagging {
         if (event.containsKey("biz_type")) {
             String type = event.get("biz_type").toString();
             if (!FieldUtil.isFieldValid(type)) {
-                LOG.warn(String.format("invalid arguments, biz_type: %s.", event.get("biz_type").toString()));
+                // LOG.warn(String.format("invalid arguments, biz_type: %s.", event.get("biz_type").toString()));
             } else {
                 prop.update(HouseTag.BIZ_TYPE, type);
             }
@@ -148,7 +148,7 @@ public class HouseTagging {
         if (event.containsKey("status")) {
             String status = event.get("status").toString();
             if (!FieldUtil.isFieldValid(status)) {
-                LOG.warn(String.format("invalid arguments, status: %s.", event.get("status").toString()));
+                // LOG.warn(String.format("invalid arguments, status: %s.", event.get("status").toString()));
             } else {
                 prop.update(HouseTag.STATUS, status);
             }

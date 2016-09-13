@@ -32,6 +32,7 @@ public class OnlineUserMessageParser {
                              List<EventDoc> eventDocs,
                              List<Row> eventsHbase,
                              List<Row> eventsIndicesHbase,
+                             List<Object[]> redisKVs,
                              String indexName) {
         String[] parts = MessageUtil.extract(line);
         if (parts.length != 4) return;
@@ -39,7 +40,8 @@ public class OnlineUserMessageParser {
         String json = MessageUtil.removeQuotes(MessageUtil.unescape(parts[1]));
         if (!json.endsWith("}")) return; // 少量
 
-        parse(parts[0], json, parts[2], parts[3], userDocs, eventDocs, eventsHbase, eventsIndicesHbase, indexName);
+        parse(parts[0], json, parts[2], parts[3], userDocs, eventDocs, eventsHbase,
+              eventsIndicesHbase, redisKVs, indexName);
     }
 
     public static boolean isValid(String id) {
@@ -54,6 +56,7 @@ public class OnlineUserMessageParser {
                                 List<EventDoc> eventDocs,
                                 List<Row> eventsHbase,
                                 List<Row> eventsIndicesHbase,
+                                List<Object[]> redisKVs,
                                 String indexName) {
         Map<String, Object> message;
         try {
@@ -145,7 +148,7 @@ public class OnlineUserMessageParser {
                 basicInfo.put(Field.WRITE_TS, System.currentTimeMillis());
                 basicInfo.put(Field.LOCATION, location);
                 basicInfo.put(Field.OS, osType);
-                parseMobile(eb, message, id, ts, messageHash, basicInfo, indexName);
+                parseMobile(eb, message, id, ts, messageHash, basicInfo, indexName, redisKVs);
                 break;
 
             // 可细分为详情页和搜索页访问, 所以注掉.
@@ -180,6 +183,8 @@ public class OnlineUserMessageParser {
                         .addEventField(message, Field.OUT_SOURCE_WEBSITE)
                         .addEventField(message, Field.OUT_KEYWORDS)
                         .addEventField(message, Field.OUT_SOURCE_LINK_NO);
+                if (message.containsKey(Field.ATTENTION_ID.value())) redisKVs.add(new Object[]{"dtl", message.get(Field.ATTENTION_ID.value()),
+                        DateUtil.toFormattedDate(DateUtil.parseDateTime(ts))});
                 break;
 
             case "[bigdata.search]":
@@ -279,6 +284,8 @@ public class OnlineUserMessageParser {
                         .addEventField(message, Field.SESSION_ID)
                         .addEventField(message, Field.ATTENTION_ID)
                         .addEventField(message, Field.ATTENTION_TYPE);
+                if (message.containsKey(Field.ATTENTION_ID.value())) redisKVs.add(new Object[]{"fl", message.get(Field.ATTENTION_ID.value()),
+                        DateUtil.toFormattedDate(DateUtil.parseDateTime(ts))});
                 break;
 
             default:
@@ -345,7 +352,8 @@ public class OnlineUserMessageParser {
     }
 
     @SuppressWarnings("unchecked")
-    protected static void parseMobile(OnlineUserEventBuilder eb, Map<String, Object> message, String id, long ts, long messageHash, Map<Field, Object> basicInfo, String indexName) {
+    protected static void parseMobile(OnlineUserEventBuilder eb, Map<String, Object> message, String id, long ts, long messageHash,
+                                      Map<Field, Object> basicInfo, String indexName, List<Object[]> redisKVs) {
         if (!message.containsKey(Field.EVENTS.value())) return;
         List<Map<String, Object>> events = (List<Map<String, Object>>) message.get(Field.EVENTS.value());
 
@@ -366,6 +374,9 @@ public class OnlineUserMessageParser {
                             .addEventField(event, Field.KEYWORDS);
 
                     addMobileFilterItems(event, eb);
+
+                    if (event.containsKey(Field.DETAIL_ID.value())) redisKVs.add(new Object[]{"dtl", event.get(Field.DETAIL_ID.value()),
+                            DateUtil.toFormattedDate(DateUtil.parseDateTime(ts))});
 
                     break;
 
@@ -390,6 +401,10 @@ public class OnlineUserMessageParser {
                             .addEventField(event, Field.ATTENTION_ID)
                             .addEventField(event, Field.ATTENTION_ACTION)
                             .addEventField(event, Field.ATTENTION_TYPE);
+
+                    if (event.containsKey(Field.ATTENTION_ID.value())) redisKVs.add(new Object[]{"fl", event.get(Field.ATTENTION_ID.value()),
+                            DateUtil.toFormattedDate(DateUtil.parseDateTime(ts))});
+
                     break;
 
                 case 6: // click

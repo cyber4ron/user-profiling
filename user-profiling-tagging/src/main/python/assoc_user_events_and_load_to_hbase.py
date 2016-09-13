@@ -40,6 +40,7 @@ if __name__ == "__main__":
 
     ONLINE_USER_EVENTS_PATH = "/user/bigdata/profiling/online_events_%date/_SUCCESS".replace("%date", date)
     ONLINE_USER_ASSOC_EVENTS_PATH = "/user/bigdata/profiling/online_user_assoc_%date/_SUCCESS".replace("%date", date)
+    ONLINE_USER_PREFER_EVENTS_PATH = "/user/bigdata/profiling/online_user_prefer_%date/_SUCCESS".replace("%date", date)
 
     ###
     while not check_hdfs_file_exist(ONLINE_USER_EVENTS_PATH):
@@ -55,6 +56,10 @@ if __name__ == "__main__":
     ###
     while not check_hdfs_file_exist(ONLINE_USER_ASSOC_EVENTS_PATH):
         log("{0} not exist, sleep and retry...".format(ONLINE_USER_ASSOC_EVENTS_PATH))
+        time.sleep(60)
+
+    while not check_hdfs_file_exist(ONLINE_USER_PREFER_EVENTS_PATH):
+        log("{0} not exist, sleep and retry...".format(ONLINE_USER_PREFER_EVENTS_PATH))
         time.sleep(60)
 
     cmd = "cd {0} && bash start_loading_to_hbase.sh {1}".format(BIN_DIR, date)

@@ -5,6 +5,7 @@ import com.lianjia.profiling.batch.hive.HqlFactory
 import com.lianjia.profiling.batch.spark.BatchBase
 import com.lianjia.profiling.common.elasticsearch.index.IndexManager
 import com.lianjia.profiling.common.ha.BatchHAManager
+import com.lianjia.profiling.common.redis.PipelinedJedisClient
 import com.lianjia.profiling.common.{BlockingBackoffRetryProxy, Logging}
 import com.lianjia.profiling.util.{SMSUtil, DateUtil, ExUtil, Properties}
 import org.apache.spark.SparkContext
@@ -117,7 +118,10 @@ object Batch extends Logging {
                  val count = inc.count()
                  logger.info(s"$taskName daily incremental lines: $count")
 
-                 if(count < dailyMaxIncLines.get(taskName).get) Batch.parseAndIndex(sc.getConf.getAll.toMap, inc, target, rowParser)
+                 if(count < dailyMaxIncLines.get(taskName).get) {
+                   Batch.parseAndIndex(sc.getConf.getAll.toMap, inc, target, rowParser)
+                   Batch.parseAndUpdateRedis(sc.getConf.getAll.toMap, inc, taskName, date)
+                 }
                  else logger.warn(s"$taskName daily inc lines: $count, aborting...")
 
                  SMSUtil.sendMail(s"$taskName $date inc", count)
@@ -262,6 +266,31 @@ object Batch extends Logging {
         case ex: Exception =>
           logger.info(s"parse index $index failed, rec seq: $seq", ex)
       }
+    }
+  }
+
+  def parseAndUpdateRedis(conf: Map[String, String], rdd: RDD[String], taskName: String, date: String) {
+    val logger = getLogger(classOf[Batch].getName, conf)
+    if(taskName == "touring_house") {
+      val redisClient = new PipelinedJedisClient
+      logger.info("starting redis update, touring_house...")
+      rdd map {line => (line.split("\t")(2), 1) } reduceByKey { (x, y) => x + y } foreachPartition { case tuples =>
+        for (tuple <- tuples) {
+          val (houseId, cnt) = tuple
+          redisClient.send(s"tr_${houseId}_${DateUtil.getOneDayBefore(DateUtil.parseDate(date))}", s"tr_${houseId}_$date", cnt)
+        }
+      }
+      redisClient.kvFlush()
+    } else if(taskName == "house") {
+      val redisClient = new PipelinedJedisClient
+      logger.info("starting redis update, house...")
+      rdd foreachPartition { lines =>
+        for (line <- lines) {
+          val parts = line.split("\t")
+          redisClient.kvSend(s"info_${parts(0)}", s"${parts(39)}\t${parts(19)}")
+        }
+      }
+      redisClient.kvFlush()
     }
   }
 }

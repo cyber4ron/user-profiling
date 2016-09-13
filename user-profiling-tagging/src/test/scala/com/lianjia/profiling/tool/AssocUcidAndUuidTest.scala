@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 import com.alibaba.fastjson.serializer.SerializerFeature
 import com.alibaba.fastjson.{JSON, JSONObject}
-import com.lianjia.profiling.tagging.AssocUcidAndUuid
+import com.lianjia.profiling.tagging.batch.AssocUserOnlineEvents
 import com.lianjia.profiling.util.ZipUtil
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -128,7 +128,7 @@ object AssocUcidAndUuidTest extends App {
 
 
   def assoc(sc: SparkContext, data: RDD[String]): RDD[(String, String)] = {
-    val houses = sc.textFile(AssocUcidAndUuid.housePath) map { line =>
+    val houses = sc.textFile(AssocUserOnlineEvents.housePath) map { line =>
       val Array(id, json) = line.split("\t")
       (id, json)
     }

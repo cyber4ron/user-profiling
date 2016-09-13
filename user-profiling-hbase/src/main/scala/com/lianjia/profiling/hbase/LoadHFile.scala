@@ -1,11 +1,12 @@
 package com.lianjia.profiling.hbase
 
 import com.lianjia.profiling.util.{DateUtil, ZipUtil}
+import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase._
 import org.apache.hadoop.hbase.client.{ConnectionFactory, HTable, Put}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapred.TableOutputFormat
-import org.apache.hadoop.hbase.mapreduce.{HFileOutputFormat, HFileOutputFormat2}
+import org.apache.hadoop.hbase.mapreduce.{LoadIncrementalHFiles, HFileOutputFormat, HFileOutputFormat2}
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
@@ -18,6 +19,24 @@ import org.slf4j.LoggerFactory
 
 object LoadHFile {
   val logger = LoggerFactory.getLogger(LoadHFile.getClass)
+
+  def removePath(path: String) {
+    val hdfsUri = "hdfs://jx-bd-hadoop00.lianjia.com:9000"
+    val hadoopConf = new org.apache.hadoop.conf.Configuration()
+    val hdfs = org.apache.hadoop.fs.FileSystem.get(new java.net.URI(hdfsUri), hadoopConf)
+
+    try {
+      println(s"removing $path")
+      if(path.length < "/user/bigdata/profiling".length) {
+        println(s"$path is to short!")
+        return
+      }
+      hdfs.delete(new org.apache.hadoop.fs.Path(path), true)
+    } catch {
+      case _: Throwable =>
+        println(s"remove $path failed.")
+    }
+  }
 
   /**
     * dump to hfile
@@ -64,11 +83,11 @@ object LoadHFile {
                                classOf[ImmutableBytesWritable], classOf[KeyValue],
                                classOf[HFileOutputFormat], job.getConfiguration)
 
-    conf.setInt("hbase.mapreduce.bulkload.max.hfiles.perRegion.perFamily", 128)
+    conf.setInt("hbase.mapreduce.bulkload.max.hfiles.perRegion.perFamily", 256)
 
     // Bulk load HFiles to Hbase
-    // val bulkLoader = new LoadIncrementalHFiles(conf)
-    // bulkLoader.doBulkLoad(new Path(path), table)
+    val bulkLoader = new LoadIncrementalHFiles(conf)
+    bulkLoader.doBulkLoad(new Path(path), table)
   }
 
   def createTable(tableName: String) {
@@ -86,21 +105,21 @@ object LoadHFile {
     val month = DateUtil.getMonth(date)
 
     val eventTableName = s"${TableManager.ONLINE_USER_EVENT_PREFIX}$month"
-    val preferTableName = s"${TableManager.ONLINE_USER_PREFER_PREFIX}$month"
+    val preferTableName = "profiling:online_user_prefer_v3"
 
     val eventSortedName = s"/user/bigdata/profiling/online_user_event_sorted_$date"
     val eventHFileName = s"/user/bigdata/profiling/online_user_event_hfile_$date"
     val preferHFileName = s"/user/bigdata/profiling/online_user_prefer_hfile_$date"
 
     val evtPath = s"/user/bigdata/profiling/online_user_assoc_$date"
-    val prfPath = s"/user/bigdata/profiling/online_user_prefer_$date"
+    val mergedIncPreferPath = s"/user/bigdata/profiling/online_user_prefer_inc_$date"
 
     logger.info("path: " + eventTableName)
     logger.info("path: " + preferTableName)
     logger.info("path: " + eventHFileName)
     logger.info("path: " + preferHFileName)
     logger.info("path: " + evtPath)
-    logger.info("path: " + prfPath)
+    logger.info("path: " + mergedIncPreferPath)
 
     // create table at start of month
     if(DateUtil.alignedByMonth() == new DateTime().minusDays(1).withTimeAtStartOfDay().toDate) {
@@ -127,6 +146,7 @@ object LoadHFile {
         }
       } sortByKey(true, evtParts)
 
+      removePath(eventSortedName)
       userEventsSorted map { case (id, evtsBase64) => s"$id\t${new String(ZipUtil.deflate(evtsBase64.getBytes))}" } saveAsTextFile eventSortedName
 
       val userEventsSortedKV = userEventsSorted map { case (id, evtsBase64) =>
@@ -136,17 +156,18 @@ object LoadHFile {
                                                                  evtsBase64.getBytes()))
       }
 
+      removePath(eventHFileName)
       saveHFileAndLoadToTable(userEventsSortedKV, eventTableName, eventHFileName)
     }
 
-    // online user preference
+    // online user preference, daily incremental
     val dumpUserPreference = sc.getConf.get("spark.backtrace.userPrefer", "false").toBoolean
 
     if(dumpUserPreference) {
       val prfParts = if (date == DateUtil.getYesterday) 4 else 16
       logger.info("prfParts: " + prfParts)
 
-      val userPreferSorted = sc.textFile(prfPath) flatMap { case line =>
+      val userPreferSorted = sc.textFile(mergedIncPreferPath) flatMap { case line =>
         try {
           val Array(id, prefer) = line.split("\t", 2)
           Array[(String, String)]((id, prefer))
@@ -162,6 +183,8 @@ object LoadHFile {
                                                                  "".getBytes, evtsBase64.getBytes()))
       }
 
+      removePath(preferHFileName)
+      // e.g. profiling:online_user_prefer_v2, /user/bigdata/profiling/xxx_0
       saveHFileAndLoadToTable(userPreferSorted, preferTableName, preferHFileName)
     }
 

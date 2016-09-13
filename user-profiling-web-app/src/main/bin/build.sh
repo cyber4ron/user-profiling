@@ -17,13 +17,13 @@ cd ~/work_lj/user-profiling/user-profiling-web-app && export JAVA_HOME=$(/usr/li
 # dm00
 export JAVA_HOME=/home/work/jdk1.7.0_79
 /home/work/install/apache-maven-3.3.9/bin/mvn -Pprod -T 4 \
--Dmaven.test.skip=true clean package install -pl user-profiling-tagging -am
-
-/home/work/install/apache-maven-3.3.9/bin/mvn -Pprod -T 4 \
--Dmaven.test.skip=true clean package install -pl user-profiling-util -am
+-Dmaven.test.skip=true clean package install deploy -pl user-profiling-util -am
 
 /home/work/install/apache-maven-3.3.9/bin/mvn -Pprod -T 4 \
 -Dmaven.test.skip=true clean package install -pl user-profiling-common -am
+
+/home/work/install/apache-maven-3.3.9/bin/mvn -Pprod -T 4 \
+-Dmaven.test.skip=true clean package install -pl user-profiling-tagging -am
 
 export JAVA_HOME=/home/work/jdk1.8.0_65
 cd /home/work/profiling-code/profiling/user-profiling-web-app && /home/work/install/apache-maven-3.3.9/bin/mvn -Pprod -T 4 \

@@ -47,10 +47,10 @@ public class TaggingTest {
     public void testCompute2() throws Exception {
         UserPreference prefer = new UserPreference();
 
-        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0);
-        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0);
-        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0);
-        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0);
+        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0F);
+        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0F);
+        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0F);
+        prefer.update(UserTag.RESBLOCK, "BJ456787654", 1.0F);
 
         // System.out.println(Arrays.toString(RunLengthEncoding.deserializeBase64(prefer.entries.get("resblock_cbf").toString())));
         System.out.println();
@@ -60,10 +60,10 @@ public class TaggingTest {
     public void testCompute3() throws Exception {
         UserPreference prefer = new UserPreference();
 
-        prefer.update(UserTag.UNIQUE, 1, 1.0);
-        prefer.update(UserTag.UNIQUE, 1, 1.0);
-        prefer.update(UserTag.UNIQUE, 1, 1.0);
-        prefer.update(UserTag.UNIQUE, 1, 1.0);
+        prefer.update(UserTag.UNIQUE, 1, 1.0F);
+        prefer.update(UserTag.UNIQUE, 1, 1.0F);
+        prefer.update(UserTag.UNIQUE, 1, 1.0F);
+        prefer.update(UserTag.UNIQUE, 1, 1.0F);
 
         // System.out.println(Arrays.toString(RunLengthEncoding.deserializeBase64(prefer.entries.get("resblock_cbf").toString())));
         System.out.println();

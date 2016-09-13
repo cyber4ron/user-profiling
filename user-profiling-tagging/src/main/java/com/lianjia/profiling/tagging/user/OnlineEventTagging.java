@@ -17,7 +17,9 @@ import static com.lianjia.profiling.tagging.features.Features.*;
 public class OnlineEventTagging extends TaggingBase {
     private static final Logger LOG = LoggerFactory.getLogger(OnlineEventTagging.class.getName());
 
-    public static void tagByHouse(UserPreference prefer, Map<String, Object> house, double weight) {
+    public static void tagByHouse(UserPreference prefer, Map<String, Object> house, float weight, String type, long ts) {
+
+        // prefer.updateHistoryHouseId(house.get("hdic_id").toString(), type, ts);
 
         updatePrice(prefer, house, "list_price", weight);
         updateArea(prefer, house, weight);
@@ -27,13 +29,15 @@ public class OnlineEventTagging extends TaggingBase {
         updateBedroomNum(prefer, house, weight);
 
         updateId(prefer, house, "district_code", UserTag.DISTRICT, weight);
-        updateId(prefer, house, "bizcircle_id", UserTag.BIZCIRCLE, weight);
+        updateId(prefer, house, "bizcircle_code", UserTag.BIZCIRCLE, weight);
         updateId(prefer, house, "resblock_id", UserTag.RESBLOCK, weight);
 
         updateBool(prefer, house, "is_school_district", UserTag.SCHOOL, weight);
         updateBool(prefer, house, "is_unique", UserTag.UNIQUE, weight);
 
         updateMetro(prefer, house, weight);
+
+        updateMeta(prefer, UserTag.WRITE_TS, System.currentTimeMillis());
     }
 
     @SuppressWarnings({"unchecked", "Duplicates"})
@@ -56,7 +60,7 @@ public class OnlineEventTagging extends TaggingBase {
 
             double weight = WEIGHTS.get(type) * DECAY.get(dateDiff);
 
-            tagByHouse(prefer, house, weight);
+            tagByHouse(prefer, house, (float) weight, type.val(), ts);
 
         } catch (Exception ex) {
             LOG.warn("", ex);
@@ -83,7 +87,7 @@ public class OnlineEventTagging extends TaggingBase {
 
             double weight = WEIGHTS.get(type) * DECAY.get(dateDiff);
 
-            tagByHouse(prefer ,house , weight);
+            tagByHouse(prefer ,house , (float) weight, type.val(), ts);
 
         } catch (Exception ex) {
             LOG.warn("", ex);
@@ -92,26 +96,6 @@ public class OnlineEventTagging extends TaggingBase {
 
     @SuppressWarnings("Duplicates")
     public static UserPreference compute(UserTag idType, String id, List<Map<String, Object>> events) {
-        UserPreference prefer = new UserPreference();
-        prefer.updateMeta(idType, id);
-
-        for (Map<String, Object> event : events) {
-            if(event.containsKey("evt") && event.get("evt").equals("dtl")) {
-                onDetail(prefer, event, EventType.PC_DETAIL);
-            } else if(event.containsKey("evt") && event.get("evt").equals("fl")) {
-                onFollow(prefer, event, EventType.PC_FOLLOW);
-            } else if(event.containsKey("evt") && event.get("evt").equals("mob_dtl")) {
-                onDetail(prefer, event, EventType.MOBILE_DETAIL);
-            } else if(event.containsKey("evt") && event.get("evt").equals("mob_fl")) {
-                onFollow(prefer, event, EventType.MOBILE_FOLLOW);
-            }
-        }
-
-        return prefer;
-    }
-
-    @SuppressWarnings("Duplicates")
-    public static UserPreference computeParallel(UserTag idType, String id, List<Map<String, Object>> events) {
         UserPreference prefer = new UserPreference();
         prefer.updateMeta(idType, id);
 

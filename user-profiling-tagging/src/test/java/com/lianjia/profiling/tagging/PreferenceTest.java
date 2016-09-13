@@ -23,12 +23,11 @@ public class PreferenceTest {
         UserPreference preference = new UserPreference();
         CountingBloomFilter counter = new CountingBloomFilter(0, 0);
         try {
-            FileOutputStream fileOut = new FileOutputStream("employee.ser");
+            FileOutputStream fileOut = new FileOutputStream("prefer_ser");
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(counter);
+            out.writeObject(preference);
             out.close();
             fileOut.close();
-            System.out.printf("Serialized data is saved in employee.ser");
         } catch (IOException i) {
             i.printStackTrace();
         }
@@ -38,19 +37,16 @@ public class PreferenceTest {
     public void testDe() {
         UserPreference e = null;
         CountingBloomFilter counter = null;
-        try
-        {
-            FileInputStream fileIn = new FileInputStream("employee.ser");
+        try {
+            FileInputStream fileIn = new FileInputStream("prefer_ser");
             ObjectInputStream in = new ObjectInputStream(fileIn);
-            counter = (CountingBloomFilter) in.readObject();
+            e = (UserPreference) in.readObject();
             in.close();
             fileIn.close();
-        }catch(IOException i)
-        {
+        } catch (IOException i) {
             i.printStackTrace();
             return;
-        }catch(ClassNotFoundException c)
-        {
+        } catch (ClassNotFoundException c) {
             System.out.println("Employee class not found");
             c.printStackTrace();
             return;
@@ -59,9 +55,18 @@ public class PreferenceTest {
     }
 
     @Test
-    public void testX() {
+    public void textA() {
+        int n = 200;
+        double p = 0.05;
+        double x = Math.max(1, (int) Math.ceil(-n * Math.log(p) / Math.pow(Math.log(2), 2)));
+        System.out.println(x);
 
-        Object[] x = (Object[]) new Integer[]{1,2};
+        // 工程上不是很划算的方法
+
+        // 655.36
+        // 1248 * 2 = 2500
+
+        // 200 * (24 + 4) = 3200
     }
 
 }

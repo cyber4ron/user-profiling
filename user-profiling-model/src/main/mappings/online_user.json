@@ -70,6 +70,10 @@
         "o_src_lk_no": {
           "type" : "byte"
         },
+        "dtl_id": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
         "dtl_type" : {
           "type" : "byte"
         },
@@ -186,6 +190,10 @@
           "type": "date",
           "format": "epoch_millis"
         },
+        "fl_id": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
         "fl_type": {
           "type": "byte"
         }
@@ -222,6 +230,10 @@
         },
         "ch_id": {
           "type": "byte"
+        },
+        "dtl_id": {
+          "type": "string",
+          "index": "not_analyzed"
         },
         "dtl_type": {
           "type": "byte"
@@ -329,6 +341,10 @@
         },
         "loc": {
           "type": "geo_point"
+        },
+        "fl_id": {
+          "type": "string",
+          "index": "not_analyzed"
         },
         "fl_act": {
           "type": "byte"

@@ -103,7 +103,7 @@ public class OfflineEventTagging extends TaggingBase {
                     }
 
                     Class<?> range = PRICE_MAPPING.get(cityId);
-                    double weight = WEIGHTS.get(EventType.DELEGATION) * DECAY.get(dateDiff);
+                    float weight = (float) ((double) WEIGHTS.get(EventType.DELEGATION) * DECAY.get(dateDiff));
 
                     if (PriceRangeLv1.class.isAssignableFrom(range))
                         prefer.update(UserTag.PRICE_LV1, idx, weight);
@@ -128,7 +128,7 @@ public class OfflineEventTagging extends TaggingBase {
                         continue;
                     }
                     prefer.update(UserTag.AREA, idx,
-                                  WEIGHTS.get(EventType.DELEGATION) * DECAY.get(dateDiff));
+                                  (float) ((double) WEIGHTS.get(EventType.DELEGATION) * DECAY.get(dateDiff)));
                 }
             }
 
@@ -143,7 +143,7 @@ public class OfflineEventTagging extends TaggingBase {
                         continue;
                     }
                     prefer.update(UserTag.ROOM_NUM, idx,
-                                  WEIGHTS.get(EventType.DELEGATION) * DECAY.get(dateDiff));
+                                  (float) ((double) WEIGHTS.get(EventType.DELEGATION) * DECAY.get(dateDiff)));
                 }
             }
         }
@@ -153,7 +153,7 @@ public class OfflineEventTagging extends TaggingBase {
             int dateDiff = getDateDiff(house, new String[]{"creation_date"});
             if (!(-MAX_DECAY_DAYS <= dateDiff && dateDiff <= 0)) continue;
 
-            double weight = WEIGHTS.get(EventType.TOURING) * DECAY.get(dateDiff);
+            float weight = (float) ((double) WEIGHTS.get(EventType.TOURING) * DECAY.get(dateDiff));
 
             updatePrice(prefer, house, "list_price", weight);
             updateArea(prefer, house, weight);
@@ -177,7 +177,7 @@ public class OfflineEventTagging extends TaggingBase {
             int dateDiff = getDateDiff(contract, new String[]{"created_time"});
             if (!(-MAX_DECAY_DAYS <= dateDiff && dateDiff <= 0)) continue;
 
-            double weight = WEIGHTS.get(EventType.TOURING) * DECAY.get(dateDiff);
+            float weight = (float) ((double) WEIGHTS.get(EventType.TOURING) * DECAY.get(dateDiff));
 
             updatePrice(prefer, contract, "price", weight);
             updateArea(prefer, contract, weight);

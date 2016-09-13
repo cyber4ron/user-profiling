@@ -124,6 +124,8 @@ public class CountingBloomFilter implements Serializable {
             counters[i] += other.counters[i];
         }
 
+        count += other.count;
+
         return this;
     }
 
@@ -144,7 +146,7 @@ public class CountingBloomFilter implements Serializable {
     }
 
     public void decay(double rate) {
-        for(int i=0;i<counters.length;i++) {
+        for (int i = 0; i < counters.length; i++) {
             counters[i] *= rate;
         }
     }

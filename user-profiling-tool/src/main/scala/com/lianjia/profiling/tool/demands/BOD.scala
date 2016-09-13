@@ -107,7 +107,8 @@ object BOD extends App {
                     """.stripMargin
 
   val delegationSql = s"""select
-                          |del.phone_a
+                          |del.phone_a,
+                          |del.city_id
                           |from data_center.dim_merge_custdel_day as del
                           |where del.pt = '${date}000000'""".stripMargin
 
@@ -134,6 +135,20 @@ object BOD extends App {
     if(x.length >= maxEvents) x
     else if (y.length >= maxEvents) y
     else x ++ y
+
+  // 算UV
+  val distinctUuids = data flatMap { line =>
+    val parts = line.split("\t")
+    if (parts.length == 2) {
+        val obj = JSON.parse(parts(1)).asInstanceOf[JSONObject]
+        if (obj.containsKey("uuid")) {
+          val id = obj.get("uuid").toString
+          Array[String](id)
+        }
+        else Array.empty[String]
+      }
+    else Array[String]()
+  } coalesce (parallel, false) distinct
 
   // 根据线上特定行为数量筛选ucid
   val ucids = (data flatMap { line =>
@@ -167,6 +182,28 @@ object BOD extends App {
 
   ucids persist StorageLevel.MEMORY_AND_DISK
 
+  val ucidsBJ = (data flatMap { line =>
+    val parts = line.split("\t")
+    if (parts.length == 2) {
+      if (!eventSet.contains(parts(0))) Array.empty[String]
+      else {
+        val obj = JSON.parse(parts(1)).asInstanceOf[JSONObject]
+        obj.put("evt", parts(0))
+        if (obj.containsKey("ucid") && obj.containsKey("city_id") && obj.getString("city_id") == "110000") {
+          val id = obj.get("ucid").toString
+          Array[String](id)
+        }
+        else Array.empty[String]
+      }
+    }
+    else Array[String]()
+  } coalesce (parallel, false)).distinct()
+
+  ucidsBJ persist StorageLevel.MEMORY_AND_DISK
+
+  val bj = (ucidsBJ map ((_, ""))) join (ucids map ((_, "")))
+
+
   // 关联电话
   // sc.makeRDD(Array(("", Map.empty[String, AnyRef]))) map { case (_, map) =>
   //  s"${map.get("ucid").get}\t${map.get("phone").get}"
@@ -177,7 +214,7 @@ object BOD extends App {
     (parts(0), parts(1))
   }
 
-  val joined = ucids.map((_, "")).join(ucid_phone) map { case (ucid, (_, phone)) => (ucid, phone) }
+  val joined = (ucids map ((_, ""))) join(ucid_phone) map { case (ucid, (_, phone)) => (ucid, phone) }
   joined.persist(StorageLevel.MEMORY_AND_DISK)
 
   // 减去有委托的
@@ -208,11 +245,50 @@ object BOD extends App {
   // 取 2000 sample
   val sample = sc.makeRDD(subBlackList.filter(_._2.startsWith("2")).takeSample(false, 2000, 0)) map { case (phone, ucid) => (ucid, phone) }
 
+  val sampleBj = (ucidsBJ map ((_, ""))) join sample
+
   // 拿房屋信息
   val houses = sc.textFile("/user/bigdata/profiling/house_20160823") map {line =>
     val parts = line.split("\t")
     (parts(0), JSON.parseObject(parts(1)))
   }
+
+  // 拿2000个ucid的登录信息
+  val ucids_2000 = sc.textFile("/user/bigdata/profiling/ucids") map { ucid => (ucid, "") }
+  val loginEvt = Set("usr")
+
+  val xx = data flatMap { line =>
+    val parts = line.split("\t")
+    if (parts.length == 2) {
+      if (!loginEvt.contains(parts(0))) Array.empty[(String, JSONObject)]
+      else {
+        val obj = JSON.parseObject(parts(1))
+        obj.put("evt", parts(0))
+        if (obj.containsKey("ucid")) {
+          val ucid = obj.getString("ucid")
+          Array[(String, JSONObject)]((ucid, obj))
+        }
+        else Array.empty[(String, JSONObject)]
+      }
+    }
+    else Array.empty[(String, JSONObject)]
+  } coalesce(parallel, false)
+
+  val xx2 = xx map { case (ucid, _) => (ucid, 1) } reduceByKey { case (x, y) => x + y }
+
+  xx persist StorageLevel.MEMORY_AND_DISK
+
+  val xx4 = xx2 join ucids_2000 map { case (ucid, (cnt, _))  => (ucid, cnt) }
+  val xx3 = xx2 join ucids_2000 map { case (ucid, (cnt, _))  => (ucid, cnt) }
+
+  xx4 leftOuterJoin xx3 map { case (ucid, (cnt1, cnt2)) => s"$ucid\t$cnt1\t${cnt2.getOrElse(0)}"} saveAsTextFile "/user/bigdata/profiling/bod_2000_login_app_web"
+
+  xx3 map { case (ucid, cnt) => s"$ucid\t$cnt" } saveAsTextFile "/user/bigdata/profiling/bod_2000_login_app"
+
+  /*map { case (ucid, (obj, _)) =>
+
+   }*/
+
 
   // 拿events
   val events = (data flatMap { line =>
@@ -222,7 +298,7 @@ object BOD extends App {
       else {
         val obj = JSON.parseObject(parts(1))
         obj.put("evt", parts(0))
-        if (obj.containsKey("ucid") ) {
+        if (obj.containsKey("ucid")) {
           val ucid = obj.getString("ucid")
           Array[(String, JSONObject)]((ucid, obj))
         }

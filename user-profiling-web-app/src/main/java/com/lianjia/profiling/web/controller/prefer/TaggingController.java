@@ -10,7 +10,6 @@ import com.lianjia.hdic.model.request.GetBizcirclesReq;
 import com.lianjia.hdic.model.request.GetDistrictsReq;
 import com.lianjia.hdic.model.request.GetResblocksReq;
 import com.lianjia.hdic.model.response.RespBase;
-import com.lianjia.profiling.tagging.features.Features;
 import com.lianjia.profiling.tagging.features.UserPreference;
 import com.lianjia.profiling.tagging.tag.UserTag;
 import com.lianjia.profiling.tagging.user.OfflineEventTagging;
@@ -19,14 +18,19 @@ import com.lianjia.profiling.util.Properties;
 import com.lianjia.profiling.web.common.AccessManager;
 import com.lianjia.profiling.web.controller.kv.UserKVController;
 import com.lianjia.profiling.web.dao.HBaseDao;
+import com.lianjia.profiling.web.util.FutureUtil;
 import com.lianjia.profiling.web.util.RespHelper;
 import org.elasticsearch.action.get.GetAction;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.SearchAction;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +40,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.lianjia.profiling.web.common.Constants.*;
 
@@ -160,28 +167,31 @@ public class TaggingController {
 
     private void rewriteIdToName(UserPreference prefer) {
 
+        long startMs = System.currentTimeMillis();
+
         // rewrite id to name
-        if(prefer.getEntries().containsKey(UserTag.DISTRICT)) {
+        if (prefer.getEntries().containsKey(UserTag.DISTRICT)) {
             Object[][] districts = (Object[][]) prefer.getEntries().get(UserTag.DISTRICT);
             for (int i = 0; i < districts.length; i++) {
                 districts[i][0] = getDistrictName((String) districts[i][0]);
             }
         }
 
-        if(prefer.getEntries().containsKey(UserTag.BIZCIRCLE)) {
+        if (prefer.getEntries().containsKey(UserTag.BIZCIRCLE)) {
             Object[][] bizcircles = (Object[][]) prefer.getEntries().get(UserTag.BIZCIRCLE);
             for (int i = 0; i < bizcircles.length; i++) {
                 bizcircles[i][0] = getBizcircleName((String) bizcircles[i][0]);
             }
         }
 
-        if(prefer.getEntries().containsKey(UserTag.RESBLOCK)) {
+        if (prefer.getEntries().containsKey(UserTag.RESBLOCK)) {
             Object[][] resblocks = (Object[][]) prefer.getEntries().get(UserTag.RESBLOCK);
             for (int i = 0; i < resblocks.length; i++) {
                 resblocks[i][0] = getResBlockName((String) resblocks[i][0]);
             }
         }
 
+        LOG.info("rewrite time: " + (System.currentTimeMillis() - startMs));
     }
 
     @RequestMapping("/prefer/user/offline/{id}")
@@ -231,7 +241,8 @@ public class TaggingController {
                                                             @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
                                                             @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
                                                             @RequestParam(value = "token", required = false, defaultValue = "") String token,
-                                                            @RequestParam(value = "par", required = false, defaultValue = "false") String par) {
+                                                            @RequestParam(value = "par", required = false, defaultValue = "false") String par,
+                                                            @RequestParam(value = "readable", required = false, defaultValue = "false") String readable) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
 
@@ -245,9 +256,9 @@ public class TaggingController {
             UserPreference prefer = par.equalsIgnoreCase("true") ? computeParallel(UserTag.UUID, uuid, events) :
                     OnlineEventTagging.compute(UserTag.UUID, uuid, events);
 
-            rewriteIdToName(prefer);
+            if (readable.equalsIgnoreCase("true")) rewriteIdToName(prefer);
 
-            LOG.info("query time: " + (System.currentTimeMillis() - startMs));
+            LOG.info("prefer, ucid: " + uuid + ", query time: " + (System.currentTimeMillis() - startMs));
 
             LOG.info(prefer.toString());
 
@@ -271,7 +282,8 @@ public class TaggingController {
                                                             @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
                                                             @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
                                                             @RequestParam(value = "token", required = false, defaultValue = "") String token,
-                                                            @RequestParam(value = "par", required = false, defaultValue = "false") String par) {
+                                                            @RequestParam(value = "par", required = false, defaultValue = "false") String par,
+                                                            @RequestParam(value = "readable", required = false, defaultValue = "false") String readable) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
 
@@ -282,10 +294,10 @@ public class TaggingController {
 
             List<Map<String, Object>> events = kvCtrl.internalGetUserOnlineByUcid(ucid, startTs, endTs, "false");
 
-            UserPreference prefer = par.equalsIgnoreCase("true") ? computeParallel(UserTag.UCID, ucid, events) :
-                    OnlineEventTagging.compute(UserTag.UCID, ucid, events);
+            UserPreference prefer = OnlineEventTagging.compute(UserTag.UCID, ucid, events);
 
-            rewriteIdToName(prefer);
+
+            if (readable.equalsIgnoreCase("true")) rewriteIdToName(prefer);
 
             LOG.info("prefer, ucid: " + ucid + ", query time: " + (System.currentTimeMillis() - startMs));
 
@@ -308,15 +320,17 @@ public class TaggingController {
     @RequestMapping("/prefer/user/online/phone/{phone}")
     @CrossOrigin
     public ResponseEntity<String> getUserOnlinePreferByPhone(@PathVariable("phone") String phone,
-                                                            @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
-                                                            @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
-                                                            @RequestParam(value = "token", required = false, defaultValue = "") String token,
-                                                            @RequestParam(value = "par", required = false, defaultValue = "false") String par) {
+                                                             @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
+                                                             @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
+                                                             @RequestParam(value = "token", required = false, defaultValue = "") String token,
+                                                             @RequestParam(value = "par", required = false, defaultValue = "false") String par,
+                                                             @RequestParam(value = "readable", required = false, defaultValue = "false") String readable) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
 
             long startMs = System.currentTimeMillis();
 
+            // get ucid
             GetRequestBuilder req = new GetRequestBuilder(client, GetAction.INSTANCE)
                     .setIndex(UCID_MAP_IDX)
                     .setId(phone);
@@ -332,11 +346,10 @@ public class TaggingController {
             UserPreference prefer = par.equalsIgnoreCase("true") ? computeParallel(UserTag.UCID, ucid, events) :
                     OnlineEventTagging.compute(UserTag.UCID, ucid, events);
 
-            rewriteIdToName(prefer);
+            if (readable.equalsIgnoreCase("true")) rewriteIdToName(prefer);
 
-            // LOG.info("prefer, phone: " + phone + ", query time: " + (System.currentTimeMillis() - startMs));
-
-            // LOG.info(ucid + ", " + prefer.toString());
+            LOG.info("prefer, phone: " + phone + ", query time: " + (System.currentTimeMillis() - startMs));
+            LOG.info(ucid + ", " + prefer.toString());
 
             return new ResponseEntity<>(prefer.toReadableJson(), HttpStatus.OK);
 
@@ -352,29 +365,126 @@ public class TaggingController {
         }
     }
 
+    @RequestMapping("/prefer/v2/user/online/uuid/{uuid}")
+    @CrossOrigin
+    public ResponseEntity<String> getUserOnlinePreferByUuidVer2(@PathVariable("uuid") String uuid,
+                                                                @RequestParam(value = "token", required = false, defaultValue = "") String token) {
+        try {
+            if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
+
+            long startMsAll = System.currentTimeMillis();
+
+            List<Map<String, Object>> events = kvCtrl.internalGetUserOnlineByUuid(uuid, System.currentTimeMillis(),
+                                                                                  new DateTime().withTimeAtStartOfDay().getMillis(), "false", false);
+
+            CompletableFuture<UserPreference> onlineRealtimeFuture = FutureUtil.getCompletableFuture(() -> {
+                long startMs = System.currentTimeMillis();
+                UserPreference prefer = OnlineEventTagging.compute(UserTag.UUID, uuid, events);
+                LOG.info("prefer v2, uuid: " + uuid + ", realtime query time: " + (System.currentTimeMillis() - startMs));
+                return prefer;
+            });
+
+            CompletableFuture<UserPreference> onlineBasicFuture = FutureUtil.getCompletableFuture(() -> {
+                try {
+                    long startMs = System.currentTimeMillis();
+                    UserPreference prefer = hbaseDao.getUserPrefer(uuid);
+                    LOG.info("prefer v2, uuid: " + uuid + ", basic query time: " + (System.currentTimeMillis() - startMs));
+                    return prefer;
+                } catch (Exception e) {
+                    return new UserPreference();
+                }
+            });
+
+            UserPreference merged = FutureUtil.sequence(Arrays.asList(onlineRealtimeFuture, onlineBasicFuture)).get(200, TimeUnit.MILLISECONDS)
+                    .stream().reduce(UserPreference::decayAndMerge).get();
+
+            LOG.info("prefer v2, uuid: " + uuid + ", query time: " + (System.currentTimeMillis() - startMsAll));
+
+            return new ResponseEntity<>(merged.toJson(), HttpStatus.OK);
+
+        } catch (IllegalAccessException ex) {
+            LOG.warn("", ex);
+            return new ResponseEntity<>(RespHelper.getFailResponse(2, "auth failed."), HttpStatus.UNAUTHORIZED);
+        } catch (IllegalStateException ex) {
+            LOG.warn("", ex);
+            return new ResponseEntity<>(RespHelper.getFailResponse(2, "query timeout."), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception ex) {
+            LOG.warn("", ex);
+            return new ResponseEntity<>(RespHelper.getFailResponse(2, "query failed."), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping("/prefer/v2/user/online/ucid/{ucid}")
+    @CrossOrigin
+    public ResponseEntity<String> getUserOnlinePreferByUcidVer2(@PathVariable("ucid") String ucid,
+                                                                @RequestParam(value = "token", required = false, defaultValue = "") String token) {
+        try {
+            if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
+
+            List<Map<String, Object>> events = kvCtrl.internalGetUserOnlineByUcid(ucid, System.currentTimeMillis(),
+                                                                                  new DateTime().withTimeAtStartOfDay().getMillis(), "false", false);
+
+            long startMsAll = System.currentTimeMillis();
+
+            CompletableFuture<UserPreference> onlineRealtimeFuture = FutureUtil.getCompletableFuture(() -> {
+                long startMs = System.currentTimeMillis();
+                UserPreference prefer = OnlineEventTagging.compute(UserTag.UCID, ucid, events);
+                LOG.info("prefer v2, ucid: " + ucid + ", realtime query time: " + (System.currentTimeMillis() - startMs));
+                return prefer;
+            });
+
+            CompletableFuture<UserPreference> onlineBasicFuture = FutureUtil.getCompletableFuture(() -> {
+                try {
+                    long startMs = System.currentTimeMillis();
+                    UserPreference prefer = hbaseDao.getUserPrefer(ucid);
+                    LOG.info("prefer v2, ucid: " + ucid + ", basic query time: " + (System.currentTimeMillis() - startMs));
+                    return prefer;
+                } catch (Exception e) {
+                    return new UserPreference();
+                }
+            });
+
+            CompletableFuture<UserPreference> offlineFuture = FutureUtil.getCompletableFuture(() -> {
+                // 拿线下行为, 并计算prefer
+                long startMs = System.currentTimeMillis();
+                SearchResponse resp = new SearchRequestBuilder(client, SearchAction.INSTANCE)
+                        .setIndices("ucid_phone")
+                        .setTypes("ucid_phone")
+                        .setQuery(QueryBuilders.termQuery("ucid", ucid))
+                        .get();
+
+                if (resp.getHits().hits().length > 0) {
+                    String json = internalGetUserOffline(resp.getHits().getAt(0).id());
+                    UserPreference prefer = OfflineEventTagging.compute(JSON.parseObject(json));
+                    LOG.info("prefer v2, ucid: " + ucid + ", offline query time: " + (System.currentTimeMillis() - startMs));
+                    return prefer;
+                } else {
+                    return new UserPreference();
+                }
+            });
+
+            UserPreference merged = FutureUtil.sequence(Arrays.asList(onlineRealtimeFuture, onlineBasicFuture, offlineFuture)).get(200, TimeUnit.MILLISECONDS)
+                    .stream().reduce(UserPreference::decayAndMerge).get();
+
+            LOG.info("prefer v2, ucid: " + ucid + ", query time: " + (System.currentTimeMillis() - startMsAll));
+
+            return new ResponseEntity<>(merged.toJson(), HttpStatus.OK);
+
+        } catch (IllegalAccessException ex) {
+            LOG.warn("", ex);
+            return new ResponseEntity<>(RespHelper.getFailResponse(2, "auth failed."), HttpStatus.UNAUTHORIZED);
+        } catch (IllegalStateException ex) {
+            LOG.warn("", ex);
+            return new ResponseEntity<>(RespHelper.getFailResponse(2, "query timeout."), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception ex) {
+            LOG.warn("", ex);
+            return new ResponseEntity<>(RespHelper.getFailResponse(2, "query failed."), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @SuppressWarnings("Duplicates")
     public static UserPreference computeParallel(UserTag idType, String id, List<Map<String, Object>> events) {
-
-        UserPreference pf = events.stream().map(event -> { // todo: parallelStream不行
-            UserPreference prefer = new UserPreference();
-
-            if(event.containsKey("evt") && event.get("evt").equals("dtl")) {
-                OnlineEventTagging.onDetail(prefer, event, Features.EventType.PC_DETAIL);
-            } else if(event.containsKey("evt") && event.get("evt").equals("fl")) {
-                OnlineEventTagging.onFollow(prefer, event, Features.EventType.PC_FOLLOW);
-            } else if(event.containsKey("evt") && event.get("evt").equals("mob_dtl")) {
-                OnlineEventTagging.onDetail(prefer, event, Features.EventType.MOBILE_DETAIL);
-            } else if(event.containsKey("evt") && event.get("evt").equals("mob_fl")) {
-                OnlineEventTagging.onFollow(prefer, event, Features.EventType.MOBILE_FOLLOW);
-            }
-            return prefer;
-
-        }).reduce(new UserPreference(), (x, y) -> {
-            x.merge(y);
-            return x;
-        });
-
-        pf.updateMeta(idType, id);
-        return pf;
+        return events.parallelStream().map(event -> OnlineEventTagging.compute(idType, id, events))
+                .reduce(new UserPreference(), UserPreference::decayAndMerge);
     }
 }

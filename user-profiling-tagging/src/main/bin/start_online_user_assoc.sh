@@ -25,7 +25,7 @@ VERSION=`head -1 profiling-version`
 
 export JAVA_HOME=/home/work/jdk1.7.0_79 && export HADOOP_CONF_DIR=${SPARK_HOME}/hadoop-conf && \
 export HADOOP_USER_NAME=bigdata && nohup ${SPARK_HOME}/bin/spark-submit \
---class com.lianjia.profiling.tagging.AssocUcidAndUuid \
+--class com.lianjia.profiling.tagging.batch.AssocUserOnlineEvents \
 --master yarn --deploy-mode client \
 --queue highPriority \
 --driver-memory 8G --executor-memory 14G \

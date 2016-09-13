@@ -20,3 +20,4 @@ nohup /home/work/jdk1.7.0_79/bin/java -Xms32000m -Xmx32000m -Djava.awt.headless=
 
 
 # e.g. ./es_start.sh 10.10.35.14
+# ./es_start.sh 10.10.8.77

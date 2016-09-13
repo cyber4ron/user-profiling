@@ -33,9 +33,10 @@ public class OnlineUserTest {
                 List<Row> puts = new ArrayList<>();
                 List<OnlineUserEventBuilder.Doc> users = new ArrayList<>();
                 List<OnlineUserEventBuilder.EventDoc> events = new ArrayList<>();
+                List<Object[]> redisKVs = new ArrayList<>();
                 List<Row> eventIdx = new ArrayList<>();
 
-                OnlineUserMessageParser.parse(line, users, events, puts, eventIdx, "online_user"); // todo online_user
+                OnlineUserMessageParser.parse(line, users, events, puts, eventIdx, redisKVs, "online_user"); // todo online_user
 
                 for (Row put : puts) {
                     System.out.println(put.toString());

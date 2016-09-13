@@ -63,9 +63,19 @@ public class TableManager {
             return true;
         } catch (IOException ex) {
             ex.printStackTrace();
+            return false;
         }
+    }
 
-        return false;
+    public static synchronized boolean drop(String tableName) throws IOException {
+        Admin admin = SimpleTablePool.getConn().getAdmin();
+        try {
+            admin.deleteTable(TableName.valueOf(tableName));
+            return true;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     public static synchronized boolean createIfNotExists(String tableName) throws IOException {
@@ -99,7 +109,9 @@ public class TableManager {
             return false;
     }
 
-    private static synchronized boolean createOnlineUserEventTable(String tableName) throws IOException {
+    public static synchronized boolean createOnlineUserEventTable(String tableName) throws IOException {
+        drop(tableName);
+
         Admin admin = SimpleTablePool.getConn().getAdmin();
         HTableDescriptor table = new HTableDescriptor(TableName.valueOf(tableName));
 
@@ -119,7 +131,9 @@ public class TableManager {
         }
     }
 
-    private static synchronized boolean createOnlineUserPreferTable(String tableName) throws IOException {
+    public static synchronized boolean createOnlineUserPreferTable(String tableName) throws IOException {
+        drop(tableName);
+
         Admin admin = SimpleTablePool.getConn().getAdmin();
         HTableDescriptor table = new HTableDescriptor(TableName.valueOf(tableName));
 

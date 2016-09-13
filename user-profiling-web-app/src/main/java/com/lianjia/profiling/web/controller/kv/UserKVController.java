@@ -93,7 +93,7 @@ public class UserKVController {
     }
 
     public static Map<String, Object> rewriteFields(Map<String, Object> source) {
-        return source.entrySet().stream().filter(entry -> !entry.getValue().toString().isEmpty())
+        return source.entrySet().parallelStream().filter(entry -> !entry.getValue().toString().isEmpty())
                 .collect(Collectors.toMap(entry -> getFieldValue(entry.getKey()), entry -> {
                     try {
                         String key = entry.getKey();
@@ -110,7 +110,7 @@ public class UserKVController {
     }
 
     public static List<Map<String, Object>> enrichOnlineUserEvent(List<Map<String, Object>> events) {
-        return events.stream().map(event -> {
+        return events.parallelStream().map(event -> {
             try {
                 return rewriteFields(event);
             } catch (Exception e) {
@@ -120,17 +120,17 @@ public class UserKVController {
     }
 
     /**
-     * @param fieldName ucid or uuid
+     * @param idType ucid or uuid
      */
-    private List<SearchHit> dailyEventsQuery(String start, String end, int from, int size,
-                                             String fieldName, Set<String> ids, long startTs, long endTs) {
+    private List<SearchHit> realTimeEventsQuery(String start, String end, int from, int size,
+                                                String idType, Set<String> ids, long startTs, long endTs) {
 
-        if(ids.isEmpty()) return Collections.emptyList();
+        if (ids.isEmpty()) return Collections.emptyList();
 
         long beforeQueryMs = System.currentTimeMillis();
 
         MultiSearchRequestBuilder multiSearch = new MultiSearchRequestBuilder(client, MultiSearchAction.INSTANCE);
-        ids.forEach(id -> {
+        ids.parallelStream().forEach(id -> {
             SearchRequestBuilder search = new SearchRequestBuilder(client, SearchAction.INSTANCE)
                     .setIndices(DateUtil.alignedByWeek(start, end).stream()
                                         .map(date -> ONLINE_USER_IDX_PREFIX + date)
@@ -140,7 +140,7 @@ public class UserKVController {
                     .setSize(size);
 
             BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                    .must(QueryBuilders.termQuery(fieldName, id))
+                    .must(QueryBuilders.termQuery(idType, id))
                     .must(QueryBuilders.rangeQuery("ts").from(startTs).to(endTs));
 
             search.setQuery(boolQuery);
@@ -150,9 +150,9 @@ public class UserKVController {
 
         MultiSearchResponse resp = multiSearch.get(TimeValue.timeValueMillis(QUERY_TIMEOUT_MS));
 
-        System.out.println("query time: " + (System.currentTimeMillis() - beforeQueryMs));
+        LOG.info("realtime query time: " + (System.currentTimeMillis() - beforeQueryMs));
 
-        return Arrays.asList(resp.getResponses()).stream()
+        return Arrays.asList(resp.getResponses()).parallelStream()
                 .filter(item -> !item.isFailure())
                 .flatMap(item -> Arrays.asList(item.getResponse().getHits().getHits()).stream())
                 .collect(Collectors.toList());
@@ -181,7 +181,7 @@ public class UserKVController {
         //         .must(QueryBuilders.rangeQuery("ts").from(startTs).to(endTs));
         // SearchResponse resp = search.setQuery(boolQuery).get(TimeValue.timeValueMillis(QUERY_TIMEOUT_MS));
 
-        System.out.println("query time: " + (System.currentTimeMillis() - beforeQueryMs));
+        LOG.info("multi indices query time: " + (System.currentTimeMillis() - beforeQueryMs));
 
         return Arrays.asList(resp.getHits().getHits());
     }
@@ -198,33 +198,33 @@ public class UserKVController {
         List<CompletableFuture<List<SearchHit>>> futures = new ArrayList<>();
 
         DateUtil.alignedByWeek(start, end).forEach(date -> ONLINE_EVENTS.forEach(event ->
-            futures.add(FutureUtil.getCompletableFuture(() -> {
-                try {
-                    SearchRequestBuilder search = new SearchRequestBuilder(client, SearchAction.INSTANCE)
-                            .setIndices(ONLINE_USER_IDX_PREFIX + date)
-                            .setTypes(event.abbr())
-                            .setFrom(from)
-                            .setSize(size);
+                                                                                         futures.add(FutureUtil.getCompletableFuture(() -> {
+                                                                                             try {
+                                                                                                 SearchRequestBuilder search = new SearchRequestBuilder(client, SearchAction.INSTANCE)
+                                                                                                         .setIndices(ONLINE_USER_IDX_PREFIX + date)
+                                                                                                         .setTypes(event.abbr())
+                                                                                                         .setFrom(from)
+                                                                                                         .setSize(size);
 
-                    if (sorted)
-                        search.addSort("ts", SortOrder.DESC);
+                                                                                                 if (sorted)
+                                                                                                     search.addSort("ts", SortOrder.DESC);
 
 
-                    TermQueryBuilder termQuery = QueryBuilders.termQuery("ucid", ucid);
-                    SearchResponse resp = search.setQuery(termQuery).get(TimeValue.timeValueMillis(QUERY_TIMEOUT_MS));
+                                                                                                 TermQueryBuilder termQuery = QueryBuilders.termQuery("ucid", ucid);
+                                                                                                 SearchResponse resp = search.setQuery(termQuery).get(TimeValue.timeValueMillis(QUERY_TIMEOUT_MS));
 
-                    // 较慢
-                    // BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                    //         .must(QueryBuilders.termQuery("ucid", ucid))
-                    //         .must(QueryBuilders.rangeQuery("ts").from(startTs).to(endTs));
-                    // SearchResponse resp = search.setQuery(boolQuery).get(TimeValue.timeValueMillis(QUERY_TIMEOUT_MS));
+                                                                                                 // 较慢
+                                                                                                 // BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                                                                                                 //         .must(QueryBuilders.termQuery("ucid", ucid))
+                                                                                                 //         .must(QueryBuilders.rangeQuery("ts").from(startTs).to(endTs));
+                                                                                                 // SearchResponse resp = search.setQuery(boolQuery).get(TimeValue.timeValueMillis(QUERY_TIMEOUT_MS));
 
-                    return Arrays.asList(resp.getHits().getHits());
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    return new ArrayList<>();
-                }
-            }))
+                                                                                                 return Arrays.asList(resp.getHits().getHits());
+                                                                                             } catch (Exception ex) {
+                                                                                                 ex.printStackTrace();
+                                                                                                 return new ArrayList<>();
+                                                                                             }
+                                                                                         }))
         ));
 
         try {
@@ -349,7 +349,7 @@ public class UserKVController {
             System.out.println(String.format("query time: %d, hits: %d", System.currentTimeMillis() - startMs,
                                              resp.getHits().getHits().length));
 
-            List<Map<String, Object>> data = Arrays.asList(resp.getHits().getHits()).stream()
+            List<Map<String, Object>> data = Arrays.asList(resp.getHits().getHits()).parallelStream()
                     .map(SearchHit::sourceAsMap).collect(Collectors.toList());
 
             String json = RespHelper.getPagedListResp(data, Integer.parseInt(page), Integer.parseInt(size));
@@ -408,7 +408,7 @@ public class UserKVController {
             LOG.info(String.format("query time: %d, hits: %d", System.currentTimeMillis() - startMs,
                                    resp.getHits().getHits().length));
 
-            List<Map<String, Object>> data = Arrays.asList(resp.getHits().getHits()).stream()
+            List<Map<String, Object>> data = Arrays.asList(resp.getHits().getHits()).parallelStream()
                     .map(SearchHit::sourceAsMap).collect(Collectors.toList());
 
             String json = RespHelper.getPagedListResp(data, Integer.parseInt(page), Integer.parseInt(size));
@@ -530,6 +530,9 @@ public class UserKVController {
         }
     }
 
+    /**
+     * @return ucid or null
+     */
     private String getUcidByUuid(String uuid) {
         GetResponse resp = new GetRequestBuilder(client, GetAction.INSTANCE)
                 .setIndex("uuid_ucid_map")
@@ -548,7 +551,7 @@ public class UserKVController {
                 .setQuery(QueryBuilders.termQuery("ucid", ucid))
                 .get();
 
-        return Arrays.asList(resp.getHits().getHits()).stream()
+        return Arrays.asList(resp.getHits().getHits()).parallelStream()
                 .map(hit -> hit.sourceAsMap().get("uuid").toString())
                 .collect(Collectors.toList());
     }
@@ -557,13 +560,11 @@ public class UserKVController {
         if (houseIds.isEmpty()) return Collections.emptyMap();
 
         MultiGetRequestBuilder multiGet = client.prepareMultiGet();
-        houseIds.stream().forEach(id -> {
-            multiGet.add("house", "house", id);
-        });
+        houseIds.stream().forEach(id -> multiGet.add("house", "house", id));
 
         MultiGetResponse resp = multiGet.get();
 
-        return Arrays.asList(resp.getResponses()).stream().filter(x -> x.getResponse().isExists())
+        return Arrays.asList(resp.getResponses()).parallelStream().filter(x -> x.getResponse().isExists())
                 .map(x -> x.getResponse().getSourceAsMap())
                 .collect(Collectors.toMap(x -> x
                         .get("house_id")
@@ -574,108 +575,64 @@ public class UserKVController {
 
     @SuppressWarnings("Duplicates")
     public List<Map<String, Object>> internalGetUserOnlineByUuid(String uuid, long startTs, long endTs, String sort) throws ExecutionException, InterruptedException {
+        return internalGetUserOnlineByUuid(uuid, startTs, endTs, sort, true);
+    }
 
-        long startOfDay = new DateTime().withTimeAtStartOfDay().getMillis();
+    /**
+     * 对uuid简化处理, 不再做uuid-ucid-uuid的二度关联
+     */
+    @SuppressWarnings("Duplicates")
+    public List<Map<String, Object>> internalGetUserOnlineByUuid(String uuid, long startTs, long endTs, String sort, boolean withHbase) throws ExecutionException, InterruptedException {
 
         List<Map<String, Object>> events = new ArrayList<>();
+
+        long startOfDay = new DateTime().withTimeAtStartOfDay().getMillis();
         if (endTs > startOfDay) {
-            // search uuid
-            final String[] ucid = new String[]{null};
-            Set<String> houseIds = new HashSet<>();
-            events = dailyEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 2000,
-                                      "uuid", new HashSet<>(Collections.singletonList(uuid)),
-                                      startTs, endTs).stream().map(hit -> {
-                Map<String, Object> res = hit.sourceAsMap();
+            String ucid = getUcidByUuid(uuid);
+            if (ucid != null) {
+                events.addAll(internalGetUserOnlineByUcid(ucid, startTs, endTs, sort, withHbase));
+            } else {
+                long startMs = System.currentTimeMillis();
 
-                if (res.containsKey("dtl_type") && res.get("dtl_type").toString().equals("1")
-                        && res.containsKey("dtl_id")) houseIds.add(res.get("dtl_id").toString());
+                if (withHbase) {
+                    events.addAll(hbaseDao.getEvents(uuid, startTs, endTs));
+                    LOG.info("hbase query time = " + (System.currentTimeMillis() - startMs));
+                }
 
-                if (res.containsKey("fl_type") && res.get("fl_type").toString().equals("2")
-                        && res.containsKey("fl_id")) houseIds.add(res.get("fl_id").toString());
-
-                if (res.containsKey("ucid")) ucid[0] = res.get("ucid").toString();
-
-                res.put("evt", hit.type());
-                return res;
-            }).collect(Collectors.toList());
-
-            // search associated ucid
-            if (ucid[0] == null) ucid[0] = getUcidByUuid(uuid);
-            if (ucid[0] != null) {
-                // 2-degree associated uuids
-                Set<String> uuids = new HashSet<>();
-                events.addAll(dailyEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 2000,
-                                               "ucid", new HashSet<>(Collections.singletonList(ucid[0])),
-                                               startTs, endTs).stream().map(hit -> {
+                startMs = System.currentTimeMillis();
+                events.addAll(realTimeEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 1000,
+                                                  "ucid", new HashSet<>(Collections.singletonList(uuid)),
+                                                  startTs, endTs).parallelStream().map(hit -> {
                     Map<String, Object> res = hit.sourceAsMap();
-
-                    if (res.containsKey("dtl_type") && res.get("dtl_type").toString().equals("1")
-                            && res.containsKey("dtl_id")) houseIds.add(res.get("dtl_id").toString());
-
-                    if (res.containsKey("fl_type") && res.get("fl_type").toString().equals("2")
-                            && res.containsKey("fl_id")) houseIds.add(res.get("fl_id").toString());
-
-                    if (res.containsKey("uuid") && !res.get("uuid").toString().equals(uuid))
-                        uuids.add(res.get("uuid").toString());
-
                     res.put("evt", hit.type());
                     return res;
                 }).collect(Collectors.toList()));
+                LOG.info("es query time = " + (System.currentTimeMillis() - startMs));
 
-                // 2-degree associated uuids
-                events.addAll( dailyEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 2000,
-                                                "uuid", uuids,
-                                                startTs, endTs).stream().map(hit -> {
-                    Map<String, Object> res = hit.sourceAsMap();
+                events = events.parallelStream()
+                        .filter(evt -> evt.containsKey("evt") && !evt.get("evt").toString().endsWith("usr"))
+                        .collect(Collectors.toList());
 
-                    if (res.containsKey("dtl_type") && res.get("dtl_type").toString().equals("1")
-                            && res.containsKey("dtl_id")) houseIds.add(res.get("dtl_id").toString());
-
-                    if (res.containsKey("fl_type") && res.get("fl_type").toString().equals("2")
-                            && res.containsKey("fl_id")) houseIds.add(res.get("fl_id").toString());
-
-                    if (res.containsKey("ucid")) ucid[0] = res.get("ucid").toString();
-
-                    res.put("evt", hit.type());
-                    return res;
-                }).collect(Collectors.toList()));
+                // desc sort by ts
+                if (sort.equalsIgnoreCase("true")) {
+                    Collections.sort(events, (e1, e2) -> {
+                        if (!e1.containsKey("ts")) return 1;
+                        if (!e2.containsKey("ts")) return -1;
+                        return e2.get("ts").toString().compareTo(e1.get("ts").toString());
+                    });
+                }
             }
-
-            // get houses
-            Map<String, Map<String, Object>> houses = getHouses(houseIds);
-            events.forEach(evt -> {
-                if (evt.containsKey("dtl_id") && houses.containsKey(evt.get("dtl_id").toString()))
-                    evt.put("house", houses.get(evt.get("dtl_id").toString()));
-                if (evt.containsKey("fl_id") && houses.containsKey(evt.get("fl_id").toString()))
-                    evt.put("house", houses.get(evt.get("fl_id").toString()));
-            });
         }
 
-        // search uuid in hbase
-        events.addAll(hbaseDao.getEvents(uuid, startTs, endTs));
+        return events;
+    }
 
-        // search ucid in hbase
-        String ucid = getUcidByUuid(uuid);
-        if (ucid != null) events.addAll(hbaseDao.getEvents(ucid, startTs, endTs));
-
-        List<Map<String, Object>> validEvents = events.stream()
-                .filter(evt -> evt.containsKey("evt") && !evt.get("evt").toString().endsWith("usr"))
-                .collect(Collectors.toList());
-
-        // desc sort by ts
-        if (sort.equalsIgnoreCase("true")) {
-            Collections.sort(validEvents, (e1, e2) -> {
-                if (!e1.containsKey("ts")) return 1;
-                if (!e2.containsKey("ts")) return -1;
-                return e2.get("ts").toString().compareTo(e1.get("ts").toString());
-            });
-        }
-
-        return validEvents;
+    public List<Map<String, Object>> internalGetUserOnlineByUcid(String ucid, long startTs, long endTs, String sort) throws ExecutionException, InterruptedException {
+        return internalGetUserOnlineByUcid(ucid, startTs, endTs, sort, true);
     }
 
     @SuppressWarnings("Duplicates")
-    public List<Map<String, Object>> internalGetUserOnlineByUcid(String ucid, long startTs, long endTs, String sort) throws ExecutionException, InterruptedException {
+    public List<Map<String, Object>> internalGetUserOnlineByUcid(String ucid, long startTs, long endTs, String sort, boolean withHbase) throws ExecutionException, InterruptedException {
 
         long startOfDay = new DateTime().withTimeAtStartOfDay().getMillis();
 
@@ -685,10 +642,12 @@ public class UserKVController {
         uuids.addAll(getUuidListByUcid(ucid));
 
         if (endTs > startOfDay) {
+            long startMs = System.currentTimeMillis();
+
             Set<String> houseIds = new HashSet<>();
-            events.addAll(dailyEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 2000,
-                                      "ucid", new HashSet<>(Collections.singletonList(ucid)),
-                                      startTs, endTs).parallelStream().map(hit -> {
+            events.addAll(realTimeEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 1000,
+                                              "ucid", new HashSet<>(Collections.singletonList(ucid)),
+                                              startTs, endTs).parallelStream().map(hit -> {
                 Map<String, Object> res = hit.sourceAsMap();
 
                 if (res.containsKey("dtl_type") && res.get("dtl_type").toString().equals("1")
@@ -705,9 +664,9 @@ public class UserKVController {
 
 
             // search associated uuids
-            events.addAll(dailyEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 2000,
-                                           "uuid", uuids,
-                                           startTs, endTs).parallelStream().map(hit -> {
+            events.addAll(realTimeEventsQuery(DateUtil.getDate(), DateUtil.getDate(), 0, 1000,
+                                              "uuid", uuids,
+                                              startTs, endTs).parallelStream().map(hit -> {
                 Map<String, Object> res = hit.sourceAsMap();
 
                 if (res.containsKey("dtl_type") && res.get("dtl_type").toString().equals("1")
@@ -730,16 +689,18 @@ public class UserKVController {
                 if (evt.containsKey("fl_id") && houses.containsKey(evt.get("fl_id").toString()))
                     evt.put("house", houses.get(evt.get("fl_id").toString()));
             });
+
+            LOG.info("es query time: " + (System.currentTimeMillis() - startMs));
         }
 
-        // search ucid from hbase
-        LOG.info("hbase query starting, ucid = " + ucid);
         long startMs = System.currentTimeMillis();
-        events.addAll(hbaseDao.getEvents(ucid, startTs, endTs));
 
-        // search uuids from hbase
-        uuids.parallelStream().forEach(uuid -> events.addAll(hbaseDao.getEvents(uuid, startTs, endTs)));
-        LOG.info("hbase query ended, ucid = " + ucid + ", query time = " + (System.currentTimeMillis() - startMs));
+        // search ucid & uuid from hbase
+        if (withHbase) {
+            uuids.add(ucid);
+            uuids.parallelStream().forEach(uuid -> events.addAll(hbaseDao.getEvents(uuid, startTs, endTs)));
+            LOG.info("hbase query ended, ucid = " + ucid + ", query time = " + (System.currentTimeMillis() - startMs));
+        }
 
         List<Map<String, Object>> validEvents = events.parallelStream()
                 .filter(evt -> evt.containsKey("evt") && !evt.get("evt").toString().endsWith("usr"))
@@ -761,10 +722,10 @@ public class UserKVController {
     @RequestMapping("/kv/user/assoc/online/uuid/{uuid}")
     @CrossOrigin
     public ResponseEntity<String> getUserOnlineByUuid(@PathVariable("uuid") String uuid,
-                                                       @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
-                                                       @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
-                                                       @RequestParam(value = "token", required = false, defaultValue = "") String token,
-                                                       @RequestParam(value = "sort", required = false, defaultValue = "false") String sort) {
+                                                      @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
+                                                      @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
+                                                      @RequestParam(value = "token", required = false, defaultValue = "") String token,
+                                                      @RequestParam(value = "sort", required = false, defaultValue = "false") String sort) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
 
@@ -792,10 +753,10 @@ public class UserKVController {
     @RequestMapping("/kv/user/assoc/online/ucid/{ucid}")
     @CrossOrigin
     public ResponseEntity<String> getUserOnlineByUcid(@PathVariable("ucid") String ucid,
-                                                       @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
-                                                       @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
-                                                       @RequestParam(value = "token", required = false, defaultValue = "") String token,
-                                                       @RequestParam(value = "sort", required = false, defaultValue = "false") String sort) {
+                                                      @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
+                                                      @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
+                                                      @RequestParam(value = "token", required = false, defaultValue = "") String token,
+                                                      @RequestParam(value = "sort", required = false, defaultValue = "false") String sort) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
 
@@ -824,10 +785,10 @@ public class UserKVController {
     @RequestMapping("/kv/user/assoc/online/phone/{phone}")
     @CrossOrigin
     public ResponseEntity<String> getUserOnlineByPhone(@PathVariable("phone") String phone,
-                                                      @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
-                                                      @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
-                                                      @RequestParam(value = "token", required = false, defaultValue = "") String token,
-                                                      @RequestParam(value = "sort", required = false, defaultValue = "false") String sort) {
+                                                       @RequestParam(value = "startTs", required = false, defaultValue = "") String startTsStr,
+                                                       @RequestParam(value = "endTs", required = false, defaultValue = "") String endTsStr,
+                                                       @RequestParam(value = "token", required = false, defaultValue = "") String token,
+                                                       @RequestParam(value = "sort", required = false, defaultValue = "false") String sort) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
 
@@ -858,5 +819,4 @@ public class UserKVController {
             return new ResponseEntity<>(RespHelper.getFailResponse(2, "query failed."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

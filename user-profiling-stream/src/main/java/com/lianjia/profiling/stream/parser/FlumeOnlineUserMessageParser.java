@@ -20,7 +20,8 @@ public class FlumeOnlineUserMessageParser extends OnlineUserMessageParser {
                              List<OnlineUserEventBuilder.EventDoc> eventDocs,
                              List<Row> eventsHbase,
                              List<Row> eventsIndicesHbase,
+                             List<Object[]> redisKVs,
                              String indexName) {
-        OnlineUserMessageParser.parse(line, userDocs, eventDocs, eventsHbase, eventsIndicesHbase, indexName);
+        OnlineUserMessageParser.parse(line, userDocs, eventDocs, eventsHbase, eventsIndicesHbase, redisKVs, indexName);
     }
 }

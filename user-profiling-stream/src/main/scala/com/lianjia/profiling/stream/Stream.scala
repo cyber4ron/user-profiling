@@ -8,11 +8,11 @@ import com.lianjia.profiling.common.elasticsearch.index.IndexRoller
 import com.lianjia.profiling.common.ha.StreamHAManager
 import com.lianjia.profiling.common.hbase.client.BlockingBatchWriteHelper
 import com.lianjia.profiling.common.hbase.roller.OnlineUserTableRoller
+import com.lianjia.profiling.common.redis.PipelinedJedisClient
 import com.lianjia.profiling.common.{BlockingBackoffRetryProxy, Logging}
 import com.lianjia.profiling.config.Constants
 import com.lianjia.profiling.stream.parser.OnlineUserMessageParser
 import com.lianjia.profiling.util.{Arguments, ExUtil}
-import org.apache.spark.scheduler.{SparkListener, SparkListenerApplicationEnd, SparkListenerJobEnd}
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka.{HasOffsetRanges, OffsetRange}
 import org.elasticsearch.action.bulk.BulkResponse
@@ -119,6 +119,7 @@ object Stream extends App with Logging {
           hbaseIndexProxy = new BlockingBatchWriteHelper(onlineUserTblListener.getTableIdx)
         }
         val esProxy = new BlockingBackoffRetryProxy(conf)
+        val redisClient = new PipelinedJedisClient
 
         logger.info(offsetRanges.mkString("\n"))
 
@@ -127,7 +128,7 @@ object Stream extends App with Logging {
             line match {
               case x if x contains "[bigdata." =>
                 linesOnlineUser += 1
-                LineHandler.processOnlineUser(line, esProxy, hbaseProxy, hbaseIndexProxy, indexListener,
+                LineHandler.processOnlineUser(line, esProxy, hbaseProxy, hbaseIndexProxy, redisClient, indexListener,
                                               OnlineUserMessageParser.parse, toES, toHBase)
 
               case x if x contains "NOTICE:" =>
@@ -217,18 +218,18 @@ class Stream extends Arguments with StreamBase {
     //    "finalStatus": "UNDEFINED",
     //    ...
 
-    sc.sparkContext.addSparkListener(new SparkListener {
-      override def onJobEnd(jobEnd: SparkListenerJobEnd) {
-        System.err.println(s"job ended, job id: ${jobEnd.jobId}, result: ${jobEnd.jobResult}.")
-      }
-
-      override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd)  { // todo: test
-        if (sc.sparkContext.isStopped) {
-          System.err.println("stopping spark streaming context...")
-          sc.stop(stopSparkContext = true, stopGracefully = true)
-        }
-      }
-    })
+    // sc.sparkContext.addSparkListener(new SparkListener {
+    //   override def onJobEnd(jobEnd: SparkListenerJobEnd) {
+    //     System.err.println(s"job ended, job id: ${jobEnd.jobId}, result: ${jobEnd.jobResult}.")
+    //   }
+    //
+    //   override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd)  { // todo: test
+    //     if (sc.sparkContext.isStopped) {
+    //       System.err.println("stopping spark streaming context...")
+    //       sc.stop(stopSparkContext = true, stopGracefully = true)
+    //     }
+    //   }
+    // })
 
     val stream = getStream(sc)
     //val kafkaVMStream = getKafkaVMStream(sc)

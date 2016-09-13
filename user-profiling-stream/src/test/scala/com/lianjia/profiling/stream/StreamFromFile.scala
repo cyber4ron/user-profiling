@@ -26,9 +26,10 @@ object StreamFromFile extends App with Logging {
       val line = orgLine.substring(4, orgLine.indexOf(", offset="))
       val users = new util.ArrayList[Doc]()
       val events = new util.ArrayList[EventDoc]()
+      val redisKVs = new util.ArrayList[Array[AnyRef]]()
       val mutations = new util.ArrayList[Row]()
       val eventIdx = new util.ArrayList[Row]()
-      OnlineUserMessageParser.parse(line, users, events, mutations, eventIdx, Constants.ONLINE_USER_IDX) // todo online_user
+      OnlineUserMessageParser.parse(line, users, events, mutations, eventIdx, redisKVs, Constants.ONLINE_USER_IDX) // todo online_user
 
       val reqs = RequestBuilder.newReq()
       // send es docs

@@ -1,5 +1,6 @@
 package com.lianjia.profiling.web.controller.thridparty;
 
+import com.lianjia.profiling.common.redis.JedisClient;
 import com.lianjia.profiling.util.DateUtil;
 import com.lianjia.profiling.util.Properties;
 import com.lianjia.profiling.web.common.AccessManager;
@@ -9,6 +10,7 @@ import com.lianjia.profiling.web.util.RespHelper;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -72,8 +74,8 @@ public class PopularHouseController {
                                                                   "and mtime between '%start' and '%end'");
 
     private static final String sqlGetHouseCity = String.join("\n", "SELECT house_id, city_id",
-                                                                   "FROM house",
-                                                                   "where house_id = '%id'");
+                                                              "FROM house",
+                                                              "where house_id = '%id'");
 
 
     private volatile Map<String, Integer> touringThd;
@@ -206,6 +208,7 @@ public class PopularHouseController {
         updateThresholdInternal();
     }
 
+    @Deprecated
     private Map<String, Object> getByFollowInternal(String houseId) throws InterruptedException, ExecutionException, TimeoutException {
 
         long timeMs = System.currentTimeMillis();
@@ -235,6 +238,47 @@ public class PopularHouseController {
         return resp;
     }
 
+    private List<Map<String, Object>> getByFollowInternalRedisBatch(List<String> houseIds) {
+
+        int tryDaysBefore = 5;
+        int tries = 0;
+
+        Map<String, Long> counts = new HashMap<>();
+        DateTime date = new DateTime();
+
+        while (counts.isEmpty() && tries < tryDaysBefore) {
+            final int triesFinal = tries;
+            counts = JedisClient.multiGetLong(houseIds.stream().map(houseId -> String.format("%s_%s_%s", "fl", houseId, DateUtil.toFormattedDate(date.minusDays(triesFinal))))
+                                                      .collect(Collectors.toList()).toArray(new String[houseIds.size()]));
+            tries++;
+        }
+
+        Map<String, String> cities = JedisClient.multiGetString(houseIds.stream().map(houseId -> String.format("%s_%s", "info", houseId))
+                                                                        .collect(Collectors.toList()).toArray(new String[houseIds.size()]));
+
+        List<Map<String, Object>> resp = new ArrayList<>();
+        for (String houseId : houseIds) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("house_id", houseId);
+            map.put("cnt", counts.containsKey(houseId) ? counts.get(houseId) : -1);
+
+            String cityId = "";
+            if (cities.containsKey(houseId)) {
+                String[] parts = cities.get(houseId).split("\t");
+                if (parts.length == 2) {
+                    cityId = parts[0];
+                }
+            }
+
+            map.put("thd", followThd.containsKey(cityId) ? followThd.get(cityId) : followThd.get("110000"));
+
+            resp.add(map);
+        }
+
+        return resp;
+    }
+
+    @Deprecated
     private Map<String, Object> getByTouringInternal(String houseId) throws InterruptedException, ExecutionException, TimeoutException {
         long timeMs = System.currentTimeMillis();
         String end = DateUtil.toDateTime(timeMs);
@@ -263,6 +307,44 @@ public class PopularHouseController {
                 resp.put("thd", touringThd.get(resBizCircle.get(0).get("bizcircle_code").toString()));
             else
                 resp.put("thd", -1);
+        }
+
+        return resp;
+    }
+
+    private List<Map<String, Object>> getByTouringInternalRedisBatch(List<String> houseIds) {
+
+        int tryDaysBefore = 5;
+        int tries = 0;
+
+        Map<String, Long> counts = new HashMap<>();
+        DateTime date = new DateTime();
+
+        while (counts.isEmpty() && tries < tryDaysBefore) {
+            final int triesFinal = tries;
+            counts = JedisClient.multiGetLong(houseIds.stream().map(houseId -> String.format("%s_%s_%s", "tr", houseId, DateUtil.toFormattedDate(date.minusDays(triesFinal))))
+                                                      .collect(Collectors.toList()).toArray(new String[houseIds.size()]));
+            tries++;
+        }
+
+        Map<String, String> bizCircles = JedisClient.multiGetString(houseIds.stream().map(houseId -> String.format("%s_%s", "info", houseId))
+                                                                            .collect(Collectors.toList()).toArray(new String[houseIds.size()]));
+
+        List<Map<String, Object>> resp = new ArrayList<>();
+        for (String houseId : houseIds) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("house_id", houseId);
+            map.put("cnt", counts.containsKey(houseId) ? counts.get(houseId) : -1);
+
+            String bizCircleId = "";
+            if (bizCircles.containsKey(houseId)) {
+                String[] parts = bizCircles.get(houseId).split("\t");
+                if (parts.length == 2) bizCircleId = parts[1];
+            }
+
+            map.put("thd", touringThd.containsKey(bizCircleId) ? touringThd.get(bizCircleId) : -1);
+
+            resp.add(map);
         }
 
         return resp;
@@ -335,7 +417,7 @@ public class PopularHouseController {
                                                @RequestParam(value = "token", required = false, defaultValue = "") String token) {
         try {
             if (!AccessManager.checkKV(token)) throw new IllegalAccessException();
-            Map<String, Object> resp = getByTouringInternal(houseId);
+            Map<String, Object> resp = getByFollowInternal(houseId);
             if (resp.size() < 4) throw new IllegalStateException("house id not exist.");
 
             return new ResponseEntity<>(RespHelper.getSuccResponseForPopularHouse(resp),
@@ -362,14 +444,7 @@ public class PopularHouseController {
             if (!AccessManager.checkKV(request.token)) throw new IllegalAccessException();
             if (request.ids.size() > 100) throw new IllegalArgumentException("too many ids");
 
-            List<Map<String, Object>> resp = request.ids.stream().map(x -> {
-                try {
-                    return getByFollowInternal(x);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }).filter(x -> x != null && x.size() == 3).collect(Collectors.toList());
+            List<Map<String, Object>> resp = getByFollowInternalRedisBatch(request.ids);
 
             return new ResponseEntity<>(RespHelper.getSuccResponseForPopularHouse(resp),
                                         HttpStatus.OK);
@@ -391,14 +466,7 @@ public class PopularHouseController {
             if (!AccessManager.checkKV(request.token)) throw new IllegalAccessException();
             if (request.ids.size() > 100) throw new IllegalArgumentException("too many ids");
 
-            List<Map<String, Object>> resp = request.ids.stream().map(x -> {
-                try {
-                    return getByTouringInternal(x);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }).filter(x -> x != null && x.size() == 4).collect(Collectors.toList());
+            List<Map<String, Object>> resp = getByTouringInternalRedisBatch(request.ids);
 
             return new ResponseEntity<>(RespHelper.getSuccResponseForPopularHouse(resp),
                                         HttpStatus.OK);

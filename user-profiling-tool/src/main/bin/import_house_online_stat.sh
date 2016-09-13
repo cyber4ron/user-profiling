@@ -19,11 +19,11 @@ VERSION=`head -1 profiling-version`
 
 export JAVA_HOME=/home/work/jdk1.7.0_79 && export HADOOP_CONF_DIR=${SPARK_HOME}/hadoop-conf && \
 export HADOOP_USER_NAME=bigdata && nohup ${SPARK_HOME}/bin/spark-submit \
---class com.lianjia.profiling.tool.DailyDump \
+--class com.lianjia.profiling.tool.DailyImportHouseOnlineStat \
 --master yarn --deploy-mode client \
 --queue default \
 --driver-memory 2G --executor-memory 3G \
---executor-cores 1  --num-executors 4 \
+--executor-cores 1  --num-executors 5 \
 --conf spark.ui.port=8099 \
 --conf user.name=bigdata \
 --conf spark.io.compression.codec=org.apache.spark.io.LZ4CompressionCodec \

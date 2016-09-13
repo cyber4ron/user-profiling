@@ -2,8 +2,7 @@ package com.lianjia.profiling.tagging.features;
 
 import com.alibaba.fastjson.JSON;
 import com.lianjia.profiling.config.Constants;
-import com.lianjia.profiling.tagging.counter.CountingBloomFilter;
-import com.lianjia.profiling.tagging.counter.RunLengthEncoding;
+import com.lianjia.profiling.tagging.counter.HashCounter;
 import com.lianjia.profiling.tagging.features.Features.*;
 import com.lianjia.profiling.tagging.tag.UserTag;
 import com.lianjia.profiling.util.DateUtil;
@@ -21,15 +20,20 @@ import java.util.*;
 
 public class UserPreference implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private static final Map<String, UserTag> FIELD_MAP = new HashMap<>();
     private static final Set<UserTag> CATEGORY_FIELDS = new HashSet<>();
+    private static final Set<UserTag> CATEGORY_CNT_FIELDS = new HashSet<>();
     private static final Set<UserTag> ID_FIELDS = new HashSet<>();
+    private static final Set<UserTag> ID_CNT_FIELDS = new HashSet<>();
+    private static final HashMap<UserTag, UserTag> CNT_FIELD_MAP = new HashMap<>();
     private static final Set<UserTag> BOOL_FIELDS = new HashSet<>();
+    private static final Set<UserTag> BOOL_CNT_FIELDS = new HashSet<>();
     private static final double MAX_BF_FALSE_POSITIVE = 0.05;
     private static final String RANGE_COUNTER_SUFFIX = "cnt";
     private static final String ID_COUNTER_SUFFIX = "cbf";
+    private static final long DEFAULT_TS = System.currentTimeMillis() - 86400L * 1000 * 3000;
 
     static {
         CATEGORY_FIELDS.add(UserTag.ROOM_NUM);
@@ -41,49 +45,63 @@ public class UserPreference implements Serializable {
         CATEGORY_FIELDS.add(UserTag.ORIENT);
         CATEGORY_FIELDS.add(UserTag.BUILDING_AGE);
 
+        CATEGORY_CNT_FIELDS.add(UserTag.ROOM_NUM_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.AREA_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.PRICE_LV1_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.PRICE_LV2_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.PRICE_LV3_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.FLOOR_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.ORIENT_CNT);
+        CATEGORY_CNT_FIELDS.add(UserTag.BUILDING_AGE_CNT);
+
         ID_FIELDS.add(UserTag.DISTRICT);
         ID_FIELDS.add(UserTag.BIZCIRCLE);
         ID_FIELDS.add(UserTag.RESBLOCK);
 
+        ID_CNT_FIELDS.add(UserTag.DISTRICT_CNT);
+        ID_CNT_FIELDS.add(UserTag.BIZCIRCLE_CNT);
+        ID_CNT_FIELDS.add(UserTag.RESBLOCK_CNT);
+
         BOOL_FIELDS.add(UserTag.UNIQUE);
         BOOL_FIELDS.add(UserTag.SCHOOL);
         BOOL_FIELDS.add(UserTag.METRO);
+
+        BOOL_CNT_FIELDS.add(UserTag.UNIQUE_CNT);
+        BOOL_CNT_FIELDS.add(UserTag.SCHOOL_CNT);
+        BOOL_CNT_FIELDS.add(UserTag.METRO_CNT);
+
+        CNT_FIELD_MAP.put(UserTag.ROOM_NUM_CNT, UserTag.ROOM_NUM);
+        CNT_FIELD_MAP.put(UserTag.AREA_CNT, UserTag.AREA);
+        CNT_FIELD_MAP.put(UserTag.PRICE_LV1_CNT, UserTag.PRICE_LV1);
+        CNT_FIELD_MAP.put(UserTag.PRICE_LV2_CNT, UserTag.PRICE_LV2);
+        CNT_FIELD_MAP.put(UserTag.PRICE_LV3_CNT, UserTag.PRICE_LV3);
+        CNT_FIELD_MAP.put(UserTag.FLOOR_CNT, UserTag.FLOOR);
+        CNT_FIELD_MAP.put(UserTag.ORIENT_CNT, UserTag.ORIENT);
+        CNT_FIELD_MAP.put(UserTag.BUILDING_AGE_CNT, UserTag.BUILDING_AGE);
+
+        CNT_FIELD_MAP.put(UserTag.DISTRICT_CNT, UserTag.DISTRICT);
+        CNT_FIELD_MAP.put(UserTag.BIZCIRCLE_CNT, UserTag.BIZCIRCLE);
+        CNT_FIELD_MAP.put(UserTag.RESBLOCK_CNT, UserTag.RESBLOCK);
+
+        CNT_FIELD_MAP.put(UserTag.UNIQUE_CNT, UserTag.UNIQUE);
+        CNT_FIELD_MAP.put(UserTag.SCHOOL_CNT, UserTag.SCHOOL);
+        CNT_FIELD_MAP.put(UserTag.METRO_CNT, UserTag.METRO);
 
         for (UserTag tag : UserTag.values()) {
             FIELD_MAP.put(tag.val(), tag);
         }
     }
 
+    // houseId + src + type -> [cnt, lastTs]
+    private Map<String, Object[]> historyHousedIds;
+    private final static long HISTORY_HOUSED_IDS_TTL = 1000 * 60 * 60 * 24 * 180L;
+
     private Map<UserTag, Object> entries;
-
-    /**
-     * construct by ES json doc. deserialize array field. todo
-     */
-    public UserPreference(String json) {
-        Set<Map.Entry<String, Object>> doc = JSON.parseObject(json).entrySet();
-        for (Map.Entry<String, Object> e : doc) {
-            if (!FIELD_MAP.containsKey(e.getKey())) {
-                //log
-                continue;
-            }
-
-            if (e.getKey().endsWith("_cnt")) {
-                int[] counter = RunLengthEncoding.deserializeBase64(e.getValue().toString());
-                entries.put(FIELD_MAP.get(e.getKey()), counter);
-
-            } else if (e.getKey().endsWith("_cbf")) {
-                CountingBloomFilter counter = new CountingBloomFilter(e.getValue().toString());
-                entries.put(FIELD_MAP.get(e.getKey()), counter);
-            } else {
-                // array fields
-                // todo
-            }
-
-        }
-    }
 
     public UserPreference() {
         entries = new HashMap<>();
+        historyHousedIds = new HashMap<>();
+        entries.put(UserTag.WRITE_TS, DEFAULT_TS);
     }
 
     private static int total(int[] counter) {
@@ -207,37 +225,36 @@ public class UserPreference implements Serializable {
 
     public void updateBoolField(UserTag field, Object val, double weight) {
         if (!String.valueOf(val).equals("0") && !String.valueOf(val).equals("1")) {
-            // LOG.warn("invalid bool field: " + val);
             return;
         }
 
         updateCategoryField(field, String.valueOf(val).equals("1") ? 1 : 0, weight);
     }
 
-    public void updateIdField(UserTag field, String id, double weight) {
+    public void updateIdField(UserTag field, String id, float weight) {
 
         Object[][] objs = entries.containsKey(field) ? cloneArray((Object[][]) entries.get(field)) : new Object[0][0];
 
         String[] values = new String[objs.length];
-        for(int i=0;i<values.length; i++){
+        for (int i = 0; i < values.length; i++) {
             values[i] = (String) objs[i][0];
         }
 
-        CountingBloomFilter counter;
+        HashCounter counter;
         if (entries.containsKey(field.counter())) {
-            counter = (CountingBloomFilter) entries.get(field.counter());
+            counter = (HashCounter) entries.get(field.counter());
         } else {
-            counter = new CountingBloomFilter(field.size(), MAX_BF_FALSE_POSITIVE);
+            counter = new HashCounter();
         }
 
-        counter.add(id.getBytes(), weight);
+        counter.add(id, weight);
 
         String[] candidates = dedup(ArrayUtils.addAll(values, id));
 
         computeIdField(field, candidates, counter);
     }
 
-    public void update(UserTag field, Object val, double weight) {
+    public void update(UserTag field, Object val, float weight) {
         if (CATEGORY_FIELDS.contains(field)) {
             updateCategoryField(field, (int) val, weight);
         } else if (BOOL_FIELDS.contains(field)) {
@@ -249,16 +266,8 @@ public class UserPreference implements Serializable {
         }
     }
 
-    /**
-     * todo
-     *
-     * @return ES compatible Map
-     */
-    public Map<String, Object> serializeToMap() {
-        return null;
-    }
-
     public void computeCategoryField(UserTag field, int[] counter) {
+
         int num = field.topNum();
         double support = field.minSupport();
         double percent = field.percent();
@@ -280,7 +289,7 @@ public class UserPreference implements Serializable {
         double[] percents = new double[num];
         for (int i = 0; i < copy.length; i++) {
             if (acc >= num || copy[i] == 0) break;
-            if (copy[i] * Constants.COUNTING_PRECISION < support || 1.0 * copy[i] / total < percent) break;
+            if (/*copy[i] * Constants.COUNTING_PRECISION < support ||*/ copy[i] / total < percent) break;
 
             top[acc] = range[i];
             percents[acc] = 1.0 * copy[i] / total;
@@ -302,11 +311,11 @@ public class UserPreference implements Serializable {
     /**
      * @param candidates primitive values
      */
-    public void computeIdField(UserTag field, Object[] candidates, CountingBloomFilter counter) {
+    public void computeIdField(UserTag field, Object[] candidates, HashCounter counter) {
         double[] counts = new double[candidates.length];
 
         for (int i = 0; i < candidates.length; i++) {
-            counts[i] = counter.count(candidates[i].toString().getBytes()) * Constants.COUNTING_PRECISION;
+            counts[i] = counter.count(candidates[i].toString()) * Constants.COUNTING_PRECISION;
         }
 
         sort(counts, candidates);
@@ -314,14 +323,13 @@ public class UserPreference implements Serializable {
         int num = field.topNum();
         double support = field.minSupport();
         double percent = field.percent();
-        double count = counter.getCount();
+        double count = counter.count();
 
         int acc = 0;
         double[] percents = new double[candidates.length];
         for (int i = 0; i < candidates.length && acc < num; i++) {
-            if (counts[i] < support || 1.0 * counts[i] / count < percent || counts[i] == 0)
-                break;
-            percents[i] = 1.0 * counts[i] / count;
+            if (/*counts[i] < support || */counts[i] / count < percent || counts[i] == 0) break;
+            percents[i] = counts[i] / count;
             acc++;
         }
 
@@ -342,41 +350,61 @@ public class UserPreference implements Serializable {
             int[] counter = merge((int[]) entries.get(field.counter()), (int[]) otherEntries.get(field.counter()));
             computeCategoryField(field, counter);
         } else if (otherEntries.containsKey(field.counter())) {
-            entries.put(field, otherEntries.get(field));
-            entries.put(field.counter(), otherEntries.get(field.counter()));
+            if(otherEntries.containsKey(field)) entries.put(field, otherEntries.get(field));
+            if(otherEntries.containsKey(field.counter())) entries.put(field.counter(), otherEntries.get(field.counter()));
         }
     }
 
-    private void mergeIdField(Map<UserTag, Object> otherEntries, UserTag field) {
-        if (entries.containsKey(field) && otherEntries.containsKey(field)) {
-            Object[] candidates = dedup(concat((Object[]) entries.get(field),
-                                         (Object[]) otherEntries.get(field)));
+    private Object[] project(Object[][] arr, int idx) {
+        Object[] res = new Object[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            res[i] = arr[i][idx];
+        }
 
-            CountingBloomFilter counter = ((CountingBloomFilter) entries.get(field.counter()))
-                    .merge(((CountingBloomFilter) otherEntries.get(field.counter())));
+        return res;
+    }
+
+    private void mergeIdField(Map<UserTag, Object> otherEntries, UserTag field) {
+        if (entries.containsKey(field.counter()) && otherEntries.containsKey(field.counter())) {
+            Object[] candidates = dedup(concat((entries.containsKey(field) ? project((Object[][]) entries.get(field), 0): new Object[0]),
+                                          (otherEntries.containsKey(field)? project((Object[][]) otherEntries.get(field), 0): new Object[0])));
+
+            HashCounter counter = HashCounter.merge((HashCounter) entries.get(field.counter()),
+                                                    ((HashCounter) otherEntries.get(field.counter())));
 
             computeIdField(field, candidates, counter);
         } else if (otherEntries.containsKey(field)) {
-            entries.put(field, otherEntries.get(field));
-            entries.put(field.counter(), otherEntries.get(field.counter()));
+            if(otherEntries.containsKey(field)) entries.put(field, otherEntries.get(field));
+            if(otherEntries.containsKey(field.counter())) entries.put(field.counter(), otherEntries.get(field.counter()));
         }
     }
 
     public void merge(UserPreference other) {
         for (Map.Entry<UserTag, Object> e : other.entries.entrySet()) {
-            if (CATEGORY_FIELDS.contains(e.getKey()) || BOOL_FIELDS.contains(e.getKey()))
-                mergeCategoryField(other.entries, e.getKey());
-            else if (ID_FIELDS.contains(e.getKey())) mergeIdField(other.entries, e.getKey());
-            else if (e.getKey() == UserTag.UCID) {
+            if (CATEGORY_CNT_FIELDS.contains(e.getKey()) || BOOL_CNT_FIELDS.contains(e.getKey()))
+                mergeCategoryField(other.entries, CNT_FIELD_MAP.get(e.getKey()));
+            else if (ID_CNT_FIELDS.contains(e.getKey())) {
+                mergeIdField(other.entries, CNT_FIELD_MAP.get(e.getKey()));
+            } else if (e.getKey() == UserTag.UCID) {
                 updateMeta(UserTag.UCID, e.getValue());
             } else if (e.getKey() == UserTag.UUID) {
                 updateMeta(UserTag.UUID, e.getValue());
-            } else if (e.getKey() == UserTag.WRITE_TS) {
-                updateMeta(UserTag.WRITE_TS, e.getValue());
-            } else {
-                //
             }
         }
+
+        // for(Map.Entry<String, Object[]> e: other.historyHousedIds.entrySet()) {
+        //     updateHistoryHouseIdAlt(e.getKey(), e.getValue());
+        // }
+    }
+
+    public static UserPreference decayAndMerge(UserPreference x, UserPreference y) {
+        // 对齐时间尺度到当前
+        x.decay();
+        y.decay();
+
+        // 这里x没有做为immutable, 提高效率
+        x.merge(y);
+        return x;
     }
 
     private void decayCategoryField(UserTag field, double regression) {
@@ -389,27 +417,28 @@ public class UserPreference implements Serializable {
         computeCategoryField(field, counter);
     }
 
-    private void decayIdField(UserTag field, double rate) {
+    private void decayIdField(UserTag field, float rate) {
         String[] candidates = entries.containsKey(field) ?
                 Arrays.copyOf((Object[]) entries.get(field), ((Object[]) entries.get(field)).length, String[].class)
                 : new String[0];
 
-        CountingBloomFilter counter = (CountingBloomFilter) entries.get(field.counter());
+        HashCounter counter = (HashCounter) entries.get(field.counter());
         counter.decay(rate);
 
         computeIdField(field, candidates, counter);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void decay() {
         int dateDiff = Days.daysBetween(new DateTime(),
-                                        DateUtil.parseDateTime(entries.get(UserTag.WRITE_TS).toString())).getDays();
+                                        DateUtil.parseDateTime((long) entries.get(UserTag.WRITE_TS))).getDays();
 
         if (dateDiff > 0 || dateDiff <= Features.MAX_DECAY_DAYS) {
             // LOG.warn("invalid date: " + entries.get(Tag.WRITE_TS).toString());
             return;
         }
 
-        double regression = Features.DECAY.get(dateDiff);
+        float regression = (float) (double) Features.DECAY.get(dateDiff);
 
         for (Map.Entry<UserTag, Object> e : entries.entrySet()) {
             UserTag field = e.getKey();
@@ -422,6 +451,8 @@ public class UserPreference implements Serializable {
                 throw new IllegalStateException("");
             }
         }
+
+        updateMeta(UserTag.WRITE_TS, System.currentTimeMillis());
     }
 
     public static boolean isCategoryField(UserTag tag) {
@@ -432,12 +463,37 @@ public class UserPreference implements Serializable {
         return ID_FIELDS.contains(tag);
     }
 
-
     public static boolean isBoolField(UserTag tag) {
         return BOOL_FIELDS.contains(tag);
     }
 
-    @Deprecated
+    public void updateHistoryHouseId(String houseId, String type, Long ts) {
+        String key = houseId + "," + type;
+        if (historyHousedIds.containsKey(key)) {
+            Object[] stat = historyHousedIds.get(key);
+            historyHousedIds.put(key, new Object[]{((int) stat[0]) + 1, Math.max(ts, (long) stat[1])});
+        } else {
+            historyHousedIds.put(key, new Object[]{1, ts});
+        }
+    }
+
+    private void updateHistoryHouseIdAlt(String key, Object[] values) {
+        if (historyHousedIds.containsKey(key)) {
+            Object[] stat = historyHousedIds.get(key);
+            historyHousedIds.put(key, new Object[]{((int) values[0]) + 1, Math.max((long) values[1], (long) stat[1])});
+        } else {
+            historyHousedIds.put(key, new Object[]{1, values[1]});
+        }
+    }
+
+    public long getWriteTs() {
+        if(entries.containsKey(UserTag.WRITE_TS)) return (long) entries.get(UserTag.WRITE_TS);
+        else {
+            entries.put(UserTag.WRITE_TS, System.currentTimeMillis());
+            return (long) entries.get(UserTag.WRITE_TS);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -449,11 +505,11 @@ public class UserPreference implements Serializable {
             } else if (e.getKey().val().endsWith(RANGE_COUNTER_SUFFIX)) {
                 sb.append(String.format("%s: %s", e.getKey(), Arrays.toString((int[]) e.getValue())));
             } else if (e.getKey().val().endsWith(ID_COUNTER_SUFFIX)) {
-                int[] arr = ((CountingBloomFilter) e.getValue()).getCounters();
                 StringBuilder counters = new StringBuilder(e.getKey() + ": ");
-                for (int i = 0; i < arr.length; i++) {
-                    if (arr[i] != 0) {
-                        counters.append(String.format("(%d,%d),", i, arr[i]));
+                int idx = 0;
+                for (Map.Entry<String, Float> ent: (HashCounter) e.getValue()) {
+                    if (ent.getValue() != 0) {
+                        counters.append(String.format("(%d,%f),", idx++, ent.getValue()));
                     }
                 }
                 sb.append(counters.substring(0, counters.length() - 1));
@@ -567,6 +623,17 @@ public class UserPreference implements Serializable {
                     repr.put(e.getKey().repr(), tags);
                     break;
 
+                case "floor":
+                    vals = (Object[][]) e.getValue();
+                    tags = new Object[vals.length][2];
+                    for (int i = 0; i < vals.length; i++) {
+                        tags[i][0] = RelativeFloorLevel.repr(Integer.valueOf(vals[i][0].toString()));
+                        tags[i][1] = new BigDecimal(Double.parseDouble(vals[i][1].toString())).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    }
+                    repr.put(e.getKey().repr(), tags);
+                    break;
+
+
                 case "bd_age":
                     vals = (Object[][]) e.getValue();
                     tags = new Object[vals.length][2];
@@ -605,6 +672,8 @@ public class UserPreference implements Serializable {
             }
         }
 
+        // repr.put("ids", historyHousedIds);
+
         return JSON.toJSONString(repr);
     }
 
@@ -616,6 +685,9 @@ public class UserPreference implements Serializable {
         return entries;
     }
 
+    /**
+     * todo use kryo
+     */
     public byte[] serialize() throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = null;
@@ -639,12 +711,19 @@ public class UserPreference implements Serializable {
         }
     }
 
-    public UserPreference deserialize(byte[] data) throws IOException, ClassNotFoundException {
+    public static UserPreference deserialize(byte[] data) throws IOException, ClassNotFoundException {
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
         ObjectInput in = null;
         try {
             in = new ObjectInputStream(bis);
-            return (UserPreference) in.readObject();
+            UserPreference prefer = (UserPreference) in.readObject();
+            for (Map.Entry<String, Object[]> e : prefer.historyHousedIds.entrySet()) {
+                if (System.currentTimeMillis() - (long) (e.getValue()[1]) > HISTORY_HOUSED_IDS_TTL)
+                    prefer.historyHousedIds.remove(e.getKey());
+            } // ConcurrentModificationException
+
+            return prefer;
+
         } finally {
             try {
                 bis.close();
