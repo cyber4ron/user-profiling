@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-batch" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-batch-mr" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-bench" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-common" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-config" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-connector" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-db-import" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-hbase" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-house-eval-backtrace" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-log-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-log-common" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-log-service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-ml" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-model" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-recomm" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-stream" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-tagging" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-test" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-tool" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-util" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-profiling-web-app" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

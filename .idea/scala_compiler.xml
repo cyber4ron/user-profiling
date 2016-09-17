@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <option name="postfixOps" value="true" />
+    <option name="implicitConversions" value="true" />
+    <profile name="Maven 1" modules="user-profiling-log-common">
+      <option name="postfixOps" value="true" />
+    </profile>
+    <profile name="Maven 3" modules="user-profiling-hbase,user-profiling-util,user-profiling-ml,user-profiling-tagging,user-profiling-tool,user-profiling-batch,user-profiling-stream,user-profiling-common,user-profiling-bench" />
+  </component>
+</project>

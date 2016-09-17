@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+      <entry name="!?*.aj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-test" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-test" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-batch" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-batch" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-batch-mr" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-batch-mr" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-stream" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-stream" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-common" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-common" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-model" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-model" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-util" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-util" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-log-common" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-log-common" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-log-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-log-service" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-log-client" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-log-client" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-config" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-config" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-tool" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-bench" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-bench" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-service" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-web-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-web-service" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-conenctor" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-connector" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-web-app" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-tag" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-tag" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-recomm" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-recomm" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-stream-mysql" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-prefer" enabled="true">
+        <sourceOutputDir name="user-profiling-prefer/target/generated-sources/annotations" />
+        <sourceTestOutputDir name="user-profiling-prefer/target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-tagging" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-hbase" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-hbase" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-house-eval-backtrace" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-house-eval-backtrace" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-db-import" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-db-import" />
+      </profile>
+      <profile default="false" name="Annotation profile for user-profiling-ml" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="user-profiling-ml" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="user-profiling" target="1.7" />
+      <module name="user-profiling-batch" target="1.7" />
+      <module name="user-profiling-batch-mr" target="1.7" />
+      <module name="user-profiling-bench" target="1.7" />
+      <module name="user-profiling-common" target="1.7" />
+      <module name="user-profiling-conenctor" target="1.7" />
+      <module name="user-profiling-config" target="1.7" />
+      <module name="user-profiling-connector" target="1.7" />
+      <module name="user-profiling-db-import" target="1.7" />
+      <module name="user-profiling-hbase" target="1.7" />
+      <module name="user-profiling-house-eval-backtrace" target="1.7" />
+      <module name="user-profiling-log-client" target="1.7" />
+      <module name="user-profiling-log-common" target="1.7" />
+      <module name="user-profiling-log-service" target="1.7" />
+      <module name="user-profiling-ml" target="1.7" />
+      <module name="user-profiling-model" target="1.7" />
+      <module name="user-profiling-prefer" target="1.7" />
+      <module name="user-profiling-recomm" target="1.7" />
+      <module name="user-profiling-service" target="1.7" />
+      <module name="user-profiling-stream" target="1.7" />
+      <module name="user-profiling-stream-mysql" target="1.7" />
+      <module name="user-profiling-tag" target="1.7" />
+      <module name="user-profiling-tagging" target="1.7" />
+      <module name="user-profiling-test" target="1.7" />
+      <module name="user-profiling-tool" target="1.7" />
+      <module name="user-profiling-util" target="1.7" />
+      <module name="user-profiling-web-app" target="1.8" />
+      <module name="user-profiling-web-service" target="1.7" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

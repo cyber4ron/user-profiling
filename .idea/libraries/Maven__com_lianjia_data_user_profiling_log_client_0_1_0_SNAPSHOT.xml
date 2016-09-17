@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Maven: com.lianjia.data:user-profiling-log-client:0.1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/lianjia/data/user-profiling-log-client/0.1.0-SNAPSHOT/user-profiling-log-client-0.1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/user-profiling-log-client/user-profiling-log-client-0.1.0-SNAPSHOT-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/lianjia/data/user-profiling-log-client/0.1.0-SNAPSHOT/user-profiling-log-client-0.1.0-SNAPSHOT-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/user-profiling-log-client/user-profiling-log-client-0.1.0-SNAPSHOT-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/lianjia/data/user-profiling-log-client/0.1.0-SNAPSHOT/user-profiling-log-client-0.1.0-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

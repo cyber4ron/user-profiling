@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/user-profiling.iml" filepath="$PROJECT_DIR$/user-profiling.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-batch/user-profiling-batch.iml" filepath="$PROJECT_DIR$/user-profiling-batch/user-profiling-batch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-batch-mr/user-profiling-batch-mr.iml" filepath="$PROJECT_DIR$/user-profiling-batch-mr/user-profiling-batch-mr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-bench/user-profiling-bench.iml" filepath="$PROJECT_DIR$/user-profiling-bench/user-profiling-bench.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-common/user-profiling-common.iml" filepath="$PROJECT_DIR$/user-profiling-common/user-profiling-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-config/user-profiling-config.iml" filepath="$PROJECT_DIR$/user-profiling-config/user-profiling-config.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-connector/user-profiling-connector.iml" filepath="$PROJECT_DIR$/user-profiling-connector/user-profiling-connector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-db-import/user-profiling-db-import.iml" filepath="$PROJECT_DIR$/user-profiling-db-import/user-profiling-db-import.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-hbase/user-profiling-hbase.iml" filepath="$PROJECT_DIR$/user-profiling-hbase/user-profiling-hbase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-house-eval-backtrace/user-profiling-house-eval-backtrace.iml" filepath="$PROJECT_DIR$/user-profiling-house-eval-backtrace/user-profiling-house-eval-backtrace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-log-client/user-profiling-log-client.iml" filepath="$PROJECT_DIR$/user-profiling-log-client/user-profiling-log-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-log-common/user-profiling-log-common.iml" filepath="$PROJECT_DIR$/user-profiling-log-common/user-profiling-log-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-log-service/user-profiling-log-service.iml" filepath="$PROJECT_DIR$/user-profiling-log-service/user-profiling-log-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-ml/user-profiling-ml.iml" filepath="$PROJECT_DIR$/user-profiling-ml/user-profiling-ml.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-model/user-profiling-model.iml" filepath="$PROJECT_DIR$/user-profiling-model/user-profiling-model.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-tagging/user-profiling-prefer.iml" filepath="$PROJECT_DIR$/user-profiling-tagging/user-profiling-prefer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-recomm/user-profiling-recomm.iml" filepath="$PROJECT_DIR$/user-profiling-recomm/user-profiling-recomm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-stream/user-profiling-stream.iml" filepath="$PROJECT_DIR$/user-profiling-stream/user-profiling-stream.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-prefer/user-profiling-tag.iml" filepath="$PROJECT_DIR$/user-profiling-prefer/user-profiling-tag.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-tagging/user-profiling-tagging.iml" filepath="$PROJECT_DIR$/user-profiling-tagging/user-profiling-tagging.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-test/user-profiling-test.iml" filepath="$PROJECT_DIR$/user-profiling-test/user-profiling-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-tool/user-profiling-tool.iml" filepath="$PROJECT_DIR$/user-profiling-tool/user-profiling-tool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-util/user-profiling-util.iml" filepath="$PROJECT_DIR$/user-profiling-util/user-profiling-util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-web-app/user-profiling-web-app.iml" filepath="$PROJECT_DIR$/user-profiling-web-app/user-profiling-web-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/user-profiling-web-app/user-profiling-web-service.iml" filepath="$PROJECT_DIR$/user-profiling-web-app/user-profiling-web-service.iml" />
+    </modules>
+  </component>
+</project>
